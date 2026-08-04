@@ -59,7 +59,7 @@ export default function AdminSettings() {
     'Administrator': 'password123',
     'TPM Manager': 'password123',
     'Engineer': 'password123',
-    'QA': 'password123',
+    'QA Inspector': 'password123',
     'Management': 'password123',
     'Auditor': 'password123'
   });

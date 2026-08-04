@@ -17,7 +17,7 @@ def seed_db():
                 ("Administrator", "System administrator with full access"),
                 ("TPM Manager", "TPM Manager responsible for CI projects"),
                 ("Engineer", "Production engineer"),
-                ("QA", "Quality assurance inspector"),
+                ("QA Inspector", "Quality assurance inspector"),
                 ("Management", "Management and executive"),
                 ("Auditor", "ISO lead auditor")
             ]
@@ -37,7 +37,7 @@ def seed_db():
                 ("admin", "admin@uti.com", "Administrator", "System Admin", "TPM"),
                 ("manager", "manager@uti.com", "TPM Manager", "TPM Manager", "TPM"),
                 ("engineer", "engineer@uti.com", "Engineer", "Senior Engineer", "Production"),
-                ("qa", "qa@uti.com", "QA", "Quality Inspector", "Quality"),
+                ("qa", "qa@uti.com", "QA Inspector", "Quality Inspector", "Quality"),
                 ("management", "management@uti.com", "Management", "Plant Director", "Executive"),
                 ("auditor", "auditor@uti.com", "Auditor", "ISO Lead Auditor", "Quality Audit")
             ]

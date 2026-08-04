@@ -151,14 +151,14 @@ def update_project(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Engineer can only edit their own projects"
             )
-    elif current_user.role == "QA":
-        # QA can only update verified fields
+    elif current_user.role == "QA Inspector":
+        # QA Inspector can only update verified fields
         update_data = project_in.model_dump(exclude_unset=True)
         allowed_fields = {"verified", "verified_by", "verified_date", "result"}
         if not all(field in allowed_fields for field in update_data.keys()):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="QA can only update verification fields"
+                detail="QA Inspector can only update verification fields"
             )
     # Administrator and TPM Manager can update anything
 
