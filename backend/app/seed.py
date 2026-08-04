@@ -277,17 +277,6 @@ def seed_db():
 
             db.commit()
 
-        print("Database seeding completed successfully.")
-
-    except Exception as e:
-        print(f"Error seeding database: {e}")
-        db.rollback()
-    finally:
-        db.close()
-
-if __name__ == "__main__":
-    seed_db()
-
         # 5. Seed Monthly KPI Snapshots for 2026 if empty
         if db.query(MonthlyKPISnapshot).count() == 0:
             snapshot_data = [
@@ -312,3 +301,14 @@ if __name__ == "__main__":
                 )
                 db.add(snapshot)
             db.commit()
+
+        print("Database seeding completed successfully.")
+
+    except Exception as e:
+        print(f"Error seeding database: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+if __name__ == "__main__":
+    seed_db()
