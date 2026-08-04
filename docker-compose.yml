@@ -10,7 +10,7 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./cims.db
     volumes:
-      - cims_data:/app/data
+      - ./backend:/app
       - ./backend/uploads:/app/uploads
 
   frontend:
@@ -24,5 +24,3 @@ services:
     depends_on:
       - backend
 
-volumes:
-  cims_data:
