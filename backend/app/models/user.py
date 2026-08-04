@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text
 from datetime import datetime
 from app.database import Base
 
@@ -13,4 +13,5 @@ class User(Base):
     role = Column(String, nullable=False, default="Engineer") # Administrator, TPM Manager, Engineer, QA, Management, Auditor
     department = Column(String, nullable=True, default="TPM")
     is_active = Column(Boolean, default=True)
+    password_changed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

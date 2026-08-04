@@ -18,8 +18,10 @@ def get_projects(
     department: Optional[str] = None,
     status: Optional[str] = None,
     priority: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
+    """Get projects - all users can view, filters apply based on role"""
     query = db.query(CIProject)
     
     if search:
@@ -42,7 +44,12 @@ def get_projects(
     return query.order_by(CIProject.id.asc()).all()
 
 @router.get("/{project_id}", response_model=CIProjectResponse)
-def get_project_by_id(project_id: int, db: Session = Depends(get_db)):
+def get_project_by_id(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get single project - all users can view"""
     project = db.query(CIProject).filter(CIProject.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -54,6 +61,9 @@ def create_project(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(["Administrator", "TPM Manager", "Engineer"]))
 ):
+    """
+    Create project - only Administrator, TPM Manager, Engineer
+    """
     # Auto-generate CI No if not provided
     if not project_in.ci_no:
         count = db.query(CIProject).count() + 1
@@ -84,7 +94,8 @@ def create_project(
     db_project = CIProject(
         **project_in.model_dump(exclude_unset=True),
         achievement_rate=ach_rate,
-        closing_days=closing_days
+        closing_days=closing_days,
+        owner_id=current_user.id  # Track who created this project
     )
     
     db.add(db_project)
@@ -108,11 +119,48 @@ def update_project(
     project_id: int,
     project_in: CIProjectUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(["Administrator", "TPM Manager", "Engineer", "QA"]))
+    current_user: User = Depends(get_current_user)
 ):
+    """
+    Update project - role-based restrictions:
+    - Administrator: can update any project
+    - TPM Manager: can update any project
+    - Engineer: can update only OWN projects
+    - QA: can update project details and mark verified
+    - Management, Auditor: cannot update
+    """
     project = db.query(CIProject).filter(CIProject.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    # Check authorization based on role
+    if current_user.role == "Management":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Management role cannot edit projects (dashboard view only)"
+        )
+    elif current_user.role == "Auditor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Auditor role is read-only"
+        )
+    elif current_user.role == "Engineer":
+        # Engineer can only edit their own projects
+        if project.owner_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Engineer can only edit their own projects"
+            )
+    elif current_user.role == "QA":
+        # QA can only update verified fields
+        update_data = project_in.model_dump(exclude_unset=True)
+        allowed_fields = {"verified", "verified_by", "verified_date", "result"}
+        if not all(field in allowed_fields for field in update_data.keys()):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="QA can only update verification fields"
+            )
+    # Administrator and TPM Manager can update anything
 
     old_status = project.status
     update_data = project_in.model_dump(exclude_unset=True)
@@ -176,6 +224,9 @@ def delete_project(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(["Administrator", "TPM Manager"]))
 ):
+    """
+    Delete project - only Administrator and TPM Manager
+    """
     project = db.query(CIProject).filter(CIProject.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")

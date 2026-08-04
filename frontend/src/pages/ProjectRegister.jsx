@@ -142,7 +142,7 @@ export default function ProjectRegister() {
         <Box sx={{ overflowX: 'auto' }}>
           <Table size="small" sx={{ minWidth: 1100 }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#1E293B', '& th': { color: '#fff', fontWeight: 700 } }}>
+              <TableRow sx={{ backgroundColor: '#1E293B', '& td': { color: '#000000', fontWeight: 700 } }}>
                 <TableCell>CI No.</TableCell>
                 <TableCell>Project Title</TableCell>
                 <TableCell>Category</TableCell>

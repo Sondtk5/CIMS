@@ -13,6 +13,7 @@ class CIProject(Base):
     category = Column(String, nullable=False) # Quality, Productivity, Cost Saving, Safety / Environment, Equipment, Others
     priority = Column(String, nullable=False, default="Medium") # Low, Medium, High, Critical
     owner = Column(String, nullable=False) # Leader / Owner
+    owner_id = Column(Integer, nullable=True, index=True) # User ID who created/owns this project
     requester = Column(String, nullable=True)
     position = Column(String, nullable=True)
     contact = Column(String, nullable=True)

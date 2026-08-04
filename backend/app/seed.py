@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, Base, engine
 from app.models.user import User
+from app.models.role import Role
 from app.models.kpi_target import KPITarget
 from app.models.ci_project import CIProject
 from app.core.security import get_password_hash
@@ -10,7 +11,27 @@ def seed_db():
     db = SessionLocal()
 
     try:
-        # 1. Seed Users if empty
+        # 1. Seed Roles if empty
+        if db.query(Role).count() == 0:
+            roles_data = [
+                ("Administrator", "System administrator with full access"),
+                ("TPM Manager", "TPM Manager responsible for CI projects"),
+                ("Engineer", "Production engineer"),
+                ("QA", "Quality assurance inspector"),
+                ("Management", "Management and executive"),
+                ("Auditor", "ISO lead auditor")
+            ]
+            for role_name, description in roles_data:
+                r = Role(
+                    name=role_name,
+                    description=description,
+                    is_active=True,
+                    updated_by="System"
+                )
+                db.add(r)
+            db.commit()
+
+        # 2. Seed Users if empty
         if db.query(User).count() == 0:
             users_data = [
                 ("admin", "admin@uti.com", "Administrator", "System Admin", "TPM"),
@@ -33,7 +54,7 @@ def seed_db():
                 db.add(u)
             db.commit()
 
-        # 2. Seed KPI Targets if empty
+        # 3. Seed KPI Targets if empty
         if db.query(KPITarget).count() == 0:
             targets_data = [
                 ("on_time_completion", "Improvement Project On-time Completion Rate", 95.0, "%", ">="),
@@ -54,7 +75,7 @@ def seed_db():
                 db.add(t)
             db.commit()
 
-        # 3. Seed CI Projects if empty
+        # 4. Seed CI Projects if empty
         if db.query(CIProject).count() == 0:
             seed_projects = [
                 {

@@ -21,6 +21,7 @@ api.interceptors.request.use((config) => {
 export const authAPI = {
   login: (username, password) => api.post('/auth/login', { username, password }),
   getMe: () => api.get('/auth/me'),
+  changePassword: (data) => api.post('/auth/change-password', data),
 };
 
 export const dashboardAPI = {
@@ -38,6 +39,11 @@ export const projectsAPI = {
 export const settingsAPI = {
   getKPITargets: () => api.get('/settings/kpi-targets'),
   updateKPITarget: (kpiKey, data) => api.put(`/settings/kpi-targets/${kpiKey}`, data),
+  getUsers: () => api.get('/settings/users'),
+  resetUserPassword: (userId, data) => api.post(`/settings/users/${userId}/reset-password`, data),
+  getRoles: () => api.get('/settings/roles'),
+  getRoleUsers: (roleId) => api.get(`/settings/roles/${roleId}/users`),
+  resetRolePassword: (roleId, data) => api.post(`/settings/roles/${roleId}/reset-password-for-users`, data),
 };
 
 export const auditAPI = {

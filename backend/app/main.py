@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.database import Base, engine
-from app.routers import auth, projects, dashboard, settings, reports, audit
+from app.routers import auth, projects, dashboard, settings, reports, audit, roles
 from app.seed import seed_db
 
 # Initialize database schema
@@ -39,6 +39,7 @@ app.include_router(dashboard.router)
 app.include_router(settings.router)
 app.include_router(reports.router)
 app.include_router(audit.router)
+app.include_router(roles.router)
 
 @app.get("/")
 def root():

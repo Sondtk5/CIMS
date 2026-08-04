@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  Box, Card, CardContent, Typography, TextField, Button, Alert, Chip, Divider, Grid
+  Box, Card, CardContent, Typography, TextField, Button, Alert
 } from '@mui/material';
 import { LockOutlined as LockIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const { login } = useAuth();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('password123');
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -18,16 +20,12 @@ export default function Login() {
     setError('');
     try {
       await login(username, password);
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err.response?.data?.detail || 'Invalid login credentials');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDemoSelect = (demoUser) => {
-    setUsername(demoUser);
-    setPassword('password123');
   };
 
   return (
@@ -80,33 +78,6 @@ export default function Login() {
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
-
-          <Divider sx={{ my: 2 }}>
-            <Typography variant="caption" sx={{ color: '#94a3b8' }}>Demo Role Quick Login</Typography>
-          </Divider>
-
-          <Grid container spacing={1}>
-            {[
-              { role: 'Administrator', user: 'admin', color: 'primary' },
-              { role: 'TPM Manager', user: 'manager', color: 'secondary' },
-              { role: 'Engineer', user: 'engineer', color: 'info' },
-              { role: 'QA Verifier', user: 'qa', color: 'success' },
-              { role: 'Management', user: 'management', color: 'warning' },
-              { role: 'Auditor', user: 'auditor', color: 'default' }
-            ].map((d) => (
-              <Grid item xs={6} key={d.user}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  onClick={() => handleDemoSelect(d.user)}
-                  sx={{ fontSize: '0.7rem', py: 0.5 }}
-                >
-                  {d.role}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
         </CardContent>
       </Card>
     </Box>

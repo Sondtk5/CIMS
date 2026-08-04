@@ -27,6 +27,7 @@ export default function MasterDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const loadDashboard = async () => {
     setLoading(true);
@@ -99,32 +100,33 @@ export default function MasterDashboard() {
   // Chart options matching Image 3 Donut & Line charts
   const statusDonutOption = {
     tooltip: { trigger: 'item' },
-    legend: { bottom: '0%', left: 'center' },
+    legend: { bottom: '2%', left: 'center', textStyle: { fontSize: 9 }, itemWidth: 20 },
     color: ['#2E7D32', '#ED6C02', '#94a3b8'],
     series: [{
       name: 'Project Status',
       type: 'pie',
-      radius: ['45%', '70%'],
-      avoidLabelOverlap: false,
-      label: { show: true, formatter: '{b}\n({d}%)' },
+      center: ['50%', '40%'],
+      radius: ['35%', '58%'],
+      avoidLabelOverlap: true,
+      label: { show: true, formatter: '{b}\n({d}%)', fontSize: 10, padding: 4 },
       data: project_status_distribution
     }]
   };
 
   const categoryDonutOption = {
     tooltip: { trigger: 'item' },
-    legend: { bottom: '0%', left: 'center' },
+    legend: { bottom: '2%', left: 'center', textStyle: { fontSize: 9 }, itemWidth: 20 },
     color: ['#1565C0', '#2E7D32', '#ED6C02', '#8b5cf6', '#0288D1'],
     series: [{
       name: 'Project Category',
       type: 'pie',
-      radius: ['45%', '70%'],
-      avoidLabelOverlap: false,
-      label: { show: true, formatter: '{d}%' },
+      center: ['50%', '40%'],
+      radius: ['35%', '58%'],
+      avoidLabelOverlap: true,
+      label: { show: true, formatter: '{d}%', fontSize: 10, padding: 4 },
       data: project_category_distribution
     }]
   };
-
   const monthlyTrendOption = {
     tooltip: { trigger: 'axis' },
     legend: { top: '0%' },
@@ -297,8 +299,23 @@ export default function MasterDashboard() {
         {/* Section 4: Monthly KPI Trend Chart */}
         <Grid item xs={4.2}>
           <Card sx={{ height: '260px' }}>
-            <Box sx={{ backgroundColor: '#0F172A', color: '#fff', px: 1.5, py: 0.8 }}>
+            <Box sx={{ backgroundColor: '#0F172A', color: '#fff', px: 1.5, py: 0.8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>4. MONTHLY KPI TREND</Typography>
+              <TextField
+                select
+                size="small"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                sx={{
+                  width: '80px',
+                  '& .MuiOutlinedInput-root': { backgroundColor: '#fff', height: '28px' },
+                  '& .MuiOutlinedInput-input': { fontSize: '0.75rem', p: '4px 8px' }
+                }}
+              >
+                {[2024, 2025, 2026].map((y) => (
+                  <MenuItem key={y} value={y}>{y}</MenuItem>
+                ))}
+              </TextField>
             </Box>
             <Box sx={{ height: '210px', p: 0.5 }}>
               <ReactECharts option={monthlyTrendOption} style={{ height: '100%', width: '100%' }} />
@@ -316,27 +333,27 @@ export default function MasterDashboard() {
         <Box sx={{ overflowX: 'auto' }}>
           <Table size="small" sx={{ minWidth: 1200, '& td, & th': { p: 0.8, fontSize: '0.75rem' } }}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#1E293B', '& th': { color: '#fff' } }}>
-                <TableCell>No.</TableCell>
-                <TableCell>CI No.</TableCell>
-                <TableCell>Project Title</TableCell>
-                <TableCell>Category</TableCell>
-                <TableCell>Process/Area</TableCell>
-                <TableCell>Start Date</TableCell>
-                <TableCell>Due Date</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Priority</TableCell>
-                <TableCell>KPI / Target</TableCell>
-                <TableCell>Before</TableCell>
-                <TableCell>Target</TableCell>
-                <TableCell>After</TableCell>
-                <TableCell>Ach (%)</TableCell>
-                <TableCell>Result</TableCell>
-                <TableCell>Verified</TableCell>
-                <TableCell>Cost Saving ($)</TableCell>
-                <TableCell>Yokoten</TableCell>
-                <TableCell>Close Date</TableCell>
-                <TableCell>Action</TableCell>
+              <TableRow sx={{ backgroundColor: '#1E293B', '& td': { color: '#000000', fontWeight: 700 } }}>
+                <TableCell sx={{ color: '#000000' }}>No.</TableCell>
+                <TableCell sx={{ color: '#000000' }}>CI No.</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Project Title</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Category</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Process/Area</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Start Date</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Due Date</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Status</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Priority</TableCell>
+                <TableCell sx={{ color: '#000000' }}>KPI / Target</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Before</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Target</TableCell>
+                <TableCell sx={{ color: '#000000' }}>After</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Ach (%)</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Result</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Verified</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Cost Saving ($)</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Yokoten</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Close Date</TableCell>
+                <TableCell sx={{ color: '#000000' }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
