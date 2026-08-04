@@ -15,7 +15,7 @@ export default function AuditLogs() {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
         <HistoryIcon color="primary" sx={{ fontSize: 32 }} />
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800 }}>ISO 9001 / IATF Audit Trail</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 800 }}>ISO 9001 / Log Tracking</Typography>
           <Typography variant="body2" sx={{ color: '#64748b' }}>Immutable record of all project modifications, verifications, and approvals</Typography>
         </Box>
       </Box>

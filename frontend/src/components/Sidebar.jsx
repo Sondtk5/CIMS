@@ -22,7 +22,7 @@ export default function Sidebar() {
     { text: 'Master Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'CI Project Register', icon: <ProjectIcon />, path: '/projects' },
     { text: 'Reports & Analytics', icon: <ReportIcon />, path: '/reports' },
-    { text: 'Audit Trail', icon: <AuditIcon />, path: '/audit' },
+    { text: 'Log Tracking', icon: <AuditIcon />, path: '/audit' },
   ];
 
   // Show Admin Settings option only if user is Administrator or TPM Manager
