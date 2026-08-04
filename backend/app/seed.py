@@ -4,7 +4,9 @@ from app.models.user import User
 from app.models.role import Role
 from app.models.kpi_target import KPITarget
 from app.models.ci_project import CIProject
+from app.models.monthly_kpi_snapshot import MonthlyKPISnapshot
 from app.core.security import get_password_hash
+from datetime import datetime
 
 def seed_db():
     Base.metadata.create_all(bind=engine)
@@ -285,3 +287,28 @@ def seed_db():
 
 if __name__ == "__main__":
     seed_db()
+
+        # 5. Seed Monthly KPI Snapshots for 2026 if empty
+        if db.query(MonthlyKPISnapshot).count() == 0:
+            snapshot_data = [
+                (2026, 1, 92.0, 88.0, 42.0, 45000.0, 1),
+                (2026, 2, 90.0, 85.0, 38.0, 48000.0, 2),
+                (2026, 3, 95.0, 92.0, 35.0, 55000.0, 2),
+                (2026, 4, 98.0, 94.0, 32.0, 58000.0, 3),
+                (2026, 5, 94.0, 91.0, 40.0, 52000.0, 3),
+                (2026, 6, 96.0, 93.0, 37.0, 61000.0, 4),
+            ]
+            for year, month, on_time, effectiveness, avg_days, cost_saving, horizontal in snapshot_data:
+                snapshot = MonthlyKPISnapshot(
+                    year=year,
+                    month=month,
+                    on_time_completion_rate=on_time,
+                    effectiveness_rate=effectiveness,
+                    avg_closing_days=avg_days,
+                    cost_saving=cost_saving,
+                    horizontal_deployment_count=horizontal,
+                    total_projects_completed=10 + (month % 5),
+                    total_projects_running=5 + (month % 3)
+                )
+                db.add(snapshot)
+            db.commit()

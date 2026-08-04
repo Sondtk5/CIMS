@@ -25,7 +25,10 @@ export const authAPI = {
 };
 
 export const dashboardAPI = {
-  getSummary: () => api.get('/dashboard'),
+  getSummary: (year = null) => {
+    const params = year ? { year } : {};
+    return api.get('/dashboard', { params });
+  },
 };
 
 export const projectsAPI = {

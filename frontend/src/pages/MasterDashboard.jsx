@@ -33,7 +33,7 @@ export default function MasterDashboard() {
     setLoading(true);
     try {
       const [resSummary, resProjects] = await Promise.all([
-        dashboardAPI.getSummary(),
+        dashboardAPI.getSummary(selectedYear),
         projectsAPI.getAll()
       ]);
       setData(resSummary.data);
@@ -47,7 +47,7 @@ export default function MasterDashboard() {
 
   useEffect(() => {
     loadDashboard();
-  }, []);
+  }, [selectedYear]);
 
   const handleOpenEdit = (project) => {
     setSelectedProject(project);

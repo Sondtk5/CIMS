@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.core.rbac import get_current_user
-from app.services.kpi_calculator import calculate_kpis
+from app.services.kpi_calculator import calculate_kpis, save_current_month_snapshot
+from datetime import datetime
 
 router = APIRouter(prefix="/api/dashboard", tags=["Master Dashboard"])
 
 @router.get("")
 def get_dashboard_summary(
+    year: int = Query(None, description="Year for monthly KPI trends (defaults to current year)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -18,6 +20,9 @@ def get_dashboard_summary(
     - TPM Manager: CI Project dashboard
     - Management: Executive dashboard (read-only)
     - Auditor: Read-only dashboard
+    
+    Query Parameters:
+    - year: Filter monthly KPI trends by year (e.g., 2024, 2025, 2026)
     
     Restricted for:
     - Engineer: No dashboard access
@@ -30,4 +35,28 @@ def get_dashboard_summary(
             detail=f"{current_user.role} role does not have access to the dashboard"
         )
     
-    return calculate_kpis(db)
+    # Use provided year or default to current year
+    if year is None:
+        year = datetime.now().year
+    
+    return calculate_kpis(db, year)
+
+
+@router.post("/snapshot/save-current-month")
+def save_month_snapshot(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Manually save current month's KPI snapshot to database.
+    Typically called at end of month.
+    Only Administrator can call this.
+    """
+    if current_user.role != "Administrator":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Administrator can save KPI snapshots"
+        )
+    
+    result = save_current_month_snapshot(db)
+    return result

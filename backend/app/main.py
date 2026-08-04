@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from app.database import Base, engine
 from app.routers import auth, projects, dashboard, settings, reports, audit, roles
 from app.seed import seed_db
+from app.models.monthly_kpi_snapshot import MonthlyKPISnapshot  # Import to register model
 
 # Initialize database schema
 Base.metadata.create_all(bind=engine)

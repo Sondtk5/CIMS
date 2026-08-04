@@ -1,10 +1,19 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from app.models.ci_project import CIProject
 from app.models.kpi_target import KPITarget
+from app.models.monthly_kpi_snapshot import MonthlyKPISnapshot
 from datetime import datetime
 
-def calculate_kpis(db: Session):
+def calculate_kpis(db: Session, year: int = None):
+    """
+    Calculate KPIs with real data from CI projects.
+    If year is provided, fetch monthly trends from DB.
+    Otherwise, use current year.
+    """
+    if year is None:
+        year = datetime.now().year
+    
     # Fetch KPI Targets from DB
     targets_db = db.query(KPITarget).all()
     targets_map = {t.kpi_key: t for t in targets_db}
@@ -65,7 +74,7 @@ def calculate_kpis(db: Session):
     # 5. Horizontal Deployment Projects
     horizontal_count = sum([1 for p in all_projects if p.horizontal_deploy == "Yes"])
 
-    # Build KPI Performance table list matching Section 1 of image 3
+    # Build KPI Performance table list
     kpi_performance_table = [
         {
             "id": 1,
@@ -125,11 +134,31 @@ def calculate_kpis(db: Session):
         cat = p.category or "Others"
         category_counts[cat] = category_counts.get(cat, 0) + 1
 
-    # Monthly trend calculation for Section 4 line chart
+    # Monthly trend calculation - Get from DB if available, otherwise empty with current month filled
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    monthly_on_time = [100, 95, 90, 100, 96, 94, 94, 95, 96, 95, 95, 96]
-    monthly_effectiveness = [92, 90, 95, 94, 94, 92, 92, 93, 94, 95, 95, 95]
-    monthly_avg_days = [42, 38, 35, 32, 40, 37, 37, 36, 35, 34, 35, 35]
+    monthly_on_time = [None] * 12
+    monthly_effectiveness = [None] * 12
+    monthly_avg_days = [None] * 12
+    
+    # Fetch monthly snapshots from DB for the selected year
+    snapshots = db.query(MonthlyKPISnapshot).filter(
+        MonthlyKPISnapshot.year == year
+    ).all()
+    
+    # Populate arrays with DB data where available
+    for snapshot in snapshots:
+        idx = snapshot.month - 1  # Convert 1-12 to 0-11
+        if 0 <= idx < 12:
+            monthly_on_time[idx] = snapshot.on_time_completion_rate
+            monthly_effectiveness[idx] = snapshot.effectiveness_rate
+            monthly_avg_days[idx] = snapshot.avg_closing_days
+    
+    # Fill current month with today's calculated values (only if in current year)
+    current_month = datetime.now().month - 1  # 0-11
+    if year == datetime.now().year:
+        monthly_on_time[current_month] = on_time_rate
+        monthly_effectiveness[current_month] = effectiveness_rate
+        monthly_avg_days[current_month] = avg_closing_days
 
     return {
         "summary_cards": {
@@ -154,8 +183,60 @@ def calculate_kpis(db: Session):
         ],
         "monthly_kpi_trend": {
             "months": months,
-            "on_time_rate": monthly_on_time,
+            "on_time_rate": monthly_on_time,  # Now includes None for months without data
             "effectiveness_rate": monthly_effectiveness,
-            "avg_closing_time": monthly_avg_days
+            "avg_closing_time": monthly_avg_days,
+            "year": year
         }
     }
+
+
+def save_current_month_snapshot(db: Session):
+    """
+    Save current month's KPI metrics as a snapshot.
+    Call this at end of each month or manually.
+    """
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    
+    # Calculate current KPIs
+    kpi_data = calculate_kpis(db, year)
+    summary = kpi_data["summary_cards"]
+    
+    # Check if snapshot already exists for this month
+    existing = db.query(MonthlyKPISnapshot).filter(
+        and_(
+            MonthlyKPISnapshot.year == year,
+            MonthlyKPISnapshot.month == month
+        )
+    ).first()
+    
+    snapshot_data = {
+        "on_time_completion_rate": summary["on_time_rate"]["rate"],
+        "effectiveness_rate": summary["effectiveness_rate"]["rate"],
+        "avg_closing_days": summary["avg_closing_days"]["days"],
+        "cost_saving": summary["cost_saving"]["amount"],
+        "horizontal_deployment_count": summary["horizontal_deployment"]["count"],
+        "total_projects_completed": summary["complete"]["count"],
+        "total_projects_running": summary["running"]["count"]
+    }
+    
+    if existing:
+        # Update existing snapshot
+        for key, value in snapshot_data.items():
+            setattr(existing, key, value)
+        db.commit()
+        db.refresh(existing)
+        return {"action": "updated", "snapshot": existing}
+    else:
+        # Create new snapshot
+        new_snapshot = MonthlyKPISnapshot(
+            year=year,
+            month=month,
+            **snapshot_data
+        )
+        db.add(new_snapshot)
+        db.commit()
+        db.refresh(new_snapshot)
+        return {"action": "created", "snapshot": new_snapshot}
