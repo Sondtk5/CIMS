@@ -35,9 +35,13 @@ export default function MasterDashboard() {
     const loadYears = async () => {
       try {
         const res = await dashboardAPI.getAvailableYears();
-        setAvailableYears(res.data.years || [new Date().getFullYear()]);
+        if (res.data && res.data.years) {
+          setAvailableYears(res.data.years);
+        }
       } catch (err) {
         console.warn('Failed to load available years', err);
+        // Fallback to default years
+        setAvailableYears([2024, 2025, 2026, 2027]);
       }
     };
     loadYears();
