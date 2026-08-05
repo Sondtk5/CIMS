@@ -34,7 +34,9 @@ def calculate_kpis(db: Session, year: int = None):
         if p.start_date:
             try:
                 start_dt = datetime.strptime(p.start_date, "%Y-%m-%d")
-                if start_dt.year == year:
+                # If year is None, include ALL projects (aggregated)
+                # Otherwise filter to specific year
+                if year is None or start_dt.year == year:
                     all_projects.append(p)
             except Exception:
                 pass
@@ -165,7 +167,9 @@ def calculate_kpis(db: Session, year: int = None):
             if p.close_date:
                 try:
                     close_dt = datetime.strptime(p.close_date, "%Y-%m-%d")
-                    if close_dt.year == year and close_dt.month == month_num:
+                    # If year is None, include all months from all years
+                    # Otherwise filter to specific year/month
+                    if (year is None or close_dt.year == year) and close_dt.month == month_num:
                         month_complete_projects.append(p)
                 except Exception:
                     pass

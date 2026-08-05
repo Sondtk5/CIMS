@@ -1,6 +1,6 @@
 """
 Seed data service for Demo mode - COMPREHENSIVE DEMO DATA
-Contains 50+ sample CI projects with full 12 months for 2024-2026.
+Contains 60 sample CI projects: 20 for each year (2024, 2025, 2026).
 All CI numbers follow format: UTIV-EN-R-YY-0000-00-###
 """
 from sqlalchemy.orm import Session
@@ -11,8 +11,8 @@ import random
 def seed_demo_data(db: Session):
     """
     Load comprehensive sample CI project data for demo mode.
-    Creates 50+ realistic CI projects across 2024-2026 with:
-    - 2024: 14 projects (all Complete)
+    Creates 60 realistic CI projects across 2024-2026 with:
+    - 2024: 20 projects (all Complete)
     - 2025: 20 projects (all Complete)
     - 2026: 20 projects (mix of Complete/Running/Pending)
     CI numbering format: UTIV-EN-R-YY-0000-00-###
@@ -25,19 +25,25 @@ def seed_demo_data(db: Session):
     demo_projects = []
     counter = 1
     
-    # 2024: 14 Complete projects
+    # 2024: 20 Complete projects
     projects_2024 = [
         {"month": 1, "title": "Reduce Slit Coater Defect Rate", "process": "Slit Coater", "metric": "Defect Rate (%)", "before": 8.5, "target": 4.0, "after": 3.9, "cost": 15000, "deploy": "Yes"},
         {"month": 1, "title": "Improve Line Efficiency Q1", "process": "Production Line", "metric": "Efficiency (%)", "before": 78.0, "target": 85.0, "after": 85.8, "cost": 8500, "deploy": "No"},
         {"month": 2, "title": "Reduce Packaging Defects", "process": "Packaging", "metric": "Defect Rate (%)", "before": 5.2, "target": 2.5, "after": 2.4, "cost": 12000, "deploy": "Yes"},
         {"month": 2, "title": "Improve Coating Uniformity", "process": "Coating Line A", "metric": "Uniformity Score", "before": 75.0, "target": 85.0, "after": 85.5, "cost": 8500, "deploy": "No"},
         {"month": 3, "title": "Optimize Die Cutting Setup", "process": "Die Cutting", "metric": "Setup Time (min)", "before": 35.0, "target": 20.0, "after": 19.8, "cost": 9000, "deploy": "Yes"},
+        {"month": 3, "title": "Improve Sorting Speed", "process": "Quality Control", "metric": "Speed (Units/min)", "before": 120.0, "target": 140.0, "after": 142.0, "cost": 7500, "deploy": "No"},
         {"month": 4, "title": "Reduce Packaging Downtime", "process": "Packaging", "metric": "Downtime (Hours)", "before": 48.0, "target": 24.0, "after": 23.5, "cost": 45000, "deploy": "Yes"},
-        {"month": 5, "title": "Improve Coating Line B Quality", "process": "Coating Line B", "metric": "Quality Score", "before": 72.0, "target": 82.0, "after": 82.5, "cost": 11000, "deploy": "No"},
-        {"month": 6, "title": "Optimize Material Waste", "process": "Die Cutting", "metric": "Waste Rate (%)", "before": 6.8, "target": 3.5, "after": 3.4, "cost": 22000, "deploy": "No"},
+        {"month": 4, "title": "Reduce Cycle Time", "process": "Packaging", "metric": "Cycle Time (sec)", "before": 28.0, "target": 18.0, "after": 17.5, "cost": 9500, "deploy": "No"},
+        {"month": 5, "title": "Improve Coating Line B Quality", "process": "Coating Line B", "metric": "Quality Score", "before": 72.0, "target": 82.0, "after": 82.5, "cost": 11000, "deploy": "Yes"},
+        {"month": 5, "title": "Reduce Color Variations", "process": "Coating Line B", "metric": "Variation (%)", "before": 4.5, "target": 2.0, "after": 1.95, "cost": 10500, "deploy": "No"},
+        {"month": 6, "title": "Optimize Material Waste", "process": "Die Cutting", "metric": "Waste Rate (%)", "before": 6.8, "target": 3.5, "after": 3.4, "cost": 22000, "deploy": "Yes"},
+        {"month": 6, "title": "Improve Inventory Turnover", "process": "Warehouse", "metric": "Turnover (times/yr)", "before": 5.0, "target": 7.0, "after": 7.2, "cost": 6500, "deploy": "No"},
         {"month": 7, "title": "Reduce Energy Consumption", "process": "Factory Floor", "metric": "Energy (kWh/Unit)", "before": 8.5, "target": 7.0, "after": 6.9, "cost": 18000, "deploy": "Yes"},
+        {"month": 7, "title": "Improve Cooling Efficiency", "process": "Facilities", "metric": "Efficiency (%)", "before": 68.0, "target": 78.0, "after": 78.5, "cost": 13000, "deploy": "No"},
         {"month": 8, "title": "Improve First Pass Yield", "process": "Coating Line B", "metric": "FPY (%)", "before": 80.0, "target": 88.0, "after": 88.5, "cost": 14000, "deploy": "Yes"},
-        {"month": 9, "title": "Reduce Maintenance Downtime", "process": "Production Line", "metric": "Downtime (Hours)", "before": 25.0, "target": 12.0, "after": 11.8, "cost": 35000, "deploy": "No"},
+        {"month": 8, "title": "Reduce Scrap Rate", "process": "Quality Control", "metric": "Scrap Rate (%)", "before": 4.2, "target": 2.0, "after": 1.9, "cost": 11000, "deploy": "No"},
+        {"month": 9, "title": "Reduce Maintenance Downtime", "process": "Production Line", "metric": "Downtime (Hours)", "before": 25.0, "target": 12.0, "after": 11.8, "cost": 35000, "deploy": "Yes"},
         {"month": 10, "title": "Optimize Production Schedule", "process": "Scheduling", "metric": "Efficiency (%)", "before": 75.0, "target": 85.0, "after": 85.2, "cost": 16000, "deploy": "Yes"},
         {"month": 11, "title": "Improve Supplier Quality", "process": "Supplier Management", "metric": "Quality Score", "before": 70.0, "target": 80.0, "after": 80.5, "cost": 7000, "deploy": "No"},
         {"month": 12, "title": "Year-End Quality Initiative", "process": "Quality Control", "metric": "Defect Rate (%)", "before": 4.5, "target": 2.5, "after": 2.4, "cost": 19000, "deploy": "Yes"},
@@ -75,7 +81,7 @@ def seed_demo_data(db: Session):
         _create_project(item, counter, 2025, demo_projects)
         counter += 1
     
-    # 2026: 20 projects (12 Complete + 6 Running + 2 Pending)
+    # 2026: 20 projects (8 Complete + 8 Running + 4 Pending)
     projects_2026 = [
         {"month": 1, "title": "Energy Reduction", "process": "Factory Floor", "metric": "Energy (kWh/Unit)", "before": 8.5, "target": 7.0, "after": 6.95, "cost": 18000, "deploy": "Yes", "status": "Complete"},
         {"month": 1, "title": "Q1 Quality", "process": "Quality Control", "metric": "Defect Rate (%)", "before": 3.2, "target": 1.8, "after": 1.75, "cost": 14000, "deploy": "No", "status": "Complete"},
@@ -91,12 +97,12 @@ def seed_demo_data(db: Session):
         {"month": 6, "title": "Coating Optimization", "process": "Coating Line A", "metric": "Uniformity (%)", "before": 85.0, "target": 92.0, "after": None, "cost": 0, "deploy": "Yes", "status": "Running"},
         {"month": 7, "title": "Process Automation", "process": "Production Line", "metric": "Automation Level (%)", "before": 45.0, "target": 65.0, "after": None, "cost": 0, "deploy": "Yes", "status": "Running"},
         {"month": 7, "title": "Control System", "process": "IT", "metric": "System Uptime (%)", "before": 94.0, "target": 99.0, "after": None, "cost": 0, "deploy": "No", "status": "Running"},
-        {"month": 8, "title": "Sustainability", "process": "Factory Floor", "metric": "Carbon Footprint (tons)", "before": 450.0, "target": 380.0, "after": None, "cost": 0, "deploy": "No", "status": "Pending"},
-        {"month": 8, "title": "Waste Reduction", "process": "Operations", "metric": "Waste Reduction (%)", "before": 15.0, "target": 25.0, "after": None, "cost": 0, "deploy": "Yes", "status": "Pending"},
-        {"month": 9, "title": "Digital Transformation", "process": "IT", "metric": "Digital Score (%)", "before": 60.0, "target": 85.0, "after": None, "cost": 0, "deploy": "No", "status": "Pending"},
-        {"month": 9, "title": "Analytics Platform", "process": "Quality Control", "metric": "Prediction Accuracy (%)", "before": 70.0, "target": 85.0, "after": None, "cost": 0, "deploy": "Yes", "status": "Pending"},
-        {"month": 10, "title": "Training Program", "process": "HR", "metric": "Training Hours/Person", "before": 20.0, "target": 40.0, "after": None, "cost": 0, "deploy": "No", "status": "Pending"},
-        {"month": 10, "title": "Skills Development", "process": "HR", "metric": "Certification Rate (%)", "before": 45.0, "target": 70.0, "after": None, "cost": 0, "deploy": "Yes", "status": "Pending"},
+        {"month": 8, "title": "Sustainability Initiative", "process": "Factory Floor", "metric": "Carbon Footprint (tons)", "before": 450.0, "target": 380.0, "after": None, "cost": 0, "deploy": "No", "status": "Running"},
+        {"month": 8, "title": "Waste Reduction Program", "process": "Operations", "metric": "Waste Reduction (%)", "before": 15.0, "target": 25.0, "after": None, "cost": 0, "deploy": "Yes", "status": "Running"},
+        {"month": 9, "title": "Sustainability", "process": "Factory Floor", "metric": "Carbon Footprint (tons)", "before": 450.0, "target": 380.0, "after": None, "cost": 0, "deploy": "No", "status": "Pending"},
+        {"month": 9, "title": "Waste Reduction", "process": "Operations", "metric": "Waste Reduction (%)", "before": 15.0, "target": 25.0, "after": None, "cost": 0, "deploy": "Yes", "status": "Pending"},
+        {"month": 10, "title": "Digital Transformation", "process": "IT", "metric": "Digital Score (%)", "before": 60.0, "target": 85.0, "after": None, "cost": 0, "deploy": "No", "status": "Pending"},
+        {"month": 10, "title": "Analytics Platform", "process": "Quality Control", "metric": "Prediction Accuracy (%)", "before": 70.0, "target": 85.0, "after": None, "cost": 0, "deploy": "Yes", "status": "Pending"},
     ]
     
     for item in projects_2026:
@@ -112,7 +118,7 @@ def seed_demo_data(db: Session):
     
     return {
         "status": "success",
-        "message": f"Seeded {len(demo_projects)} comprehensive demo projects",
+        "message": f"Seeded {len(demo_projects)} comprehensive demo projects (60 total: 20 per year)",
         "count": len(demo_projects)
     }
 
