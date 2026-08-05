@@ -19,16 +19,14 @@ export default function Sidebar() {
   const { user } = useAuth();
 
   const navItems = [
-    { text: 'Master Dashboard', icon: <DashboardIcon />, path: '/' },
-    { text: 'CI Project Register', icon: <ProjectIcon />, path: '/projects' },
-    { text: 'Reports & Analytics', icon: <ReportIcon />, path: '/reports' },
-    { text: 'Log Tracking', icon: <AuditIcon />, path: '/audit' },
+    { text: 'Master Dashboard', icon: <DashboardIcon />, path: '/', roles: ['Administrator', 'TPM Manager', 'Engineer', 'QA Inspector', 'Management', 'Auditor'] },
+    { text: 'CI Project Register', icon: <ProjectIcon />, path: '/projects', roles: ['Administrator', 'TPM Manager', 'Engineer', 'QA Inspector', 'Management', 'Auditor'] },
+    { text: 'Reports & Analytics', icon: <ReportIcon />, path: '/reports', roles: ['Administrator', 'TPM Manager', 'Engineer', 'QA Inspector', 'Management', 'Auditor'] },
+    { text: 'Log Tracking', icon: <AuditIcon />, path: '/audit', roles: ['Administrator', 'Auditor'] },
+    { text: 'Admin Settings', icon: <SettingsIcon />, path: '/settings', roles: ['Administrator'] },
   ];
 
-  // Show Admin Settings option only if user is Administrator or TPM Manager
-  if (user && (user.role === 'Administrator' || user.role === 'TPM Manager')) {
-    navItems.push({ text: 'Admin Settings (KPI)', icon: <SettingsIcon />, path: '/settings' });
-  }
+  const filteredItems = navItems.filter(item => user && item.roles.includes(user.role));
 
   return (
     <Drawer
@@ -50,7 +48,7 @@ export default function Sidebar() {
           Navigation
         </Typography>
         <List>
-          {navItems.map((item) => {
+          {filteredItems.map((item) => {
             const active = location.pathname === item.path;
             return (
               <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
