@@ -1,19 +1,4 @@
-  // Load available years on component mount
-  useEffect(() => {
-    const loadYears = async () => {
-      try {
-        const res = await dashboardAPI.getAvailableYears();
-        setAvailableYears(res.data.years || [new Date().getFullYear()]);
-        // Set to first available year if current isn't available
-        if (res.data.years && !res.data.years.includes(selectedYear)) {
-          setSelectedYear(res.data.years[0]);
-        }
-      } catch (err) {
-        console.warn('Failed to load available years', err);
-      }
-    };
-    loadYears();
-  }, []);import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, Table, TableHead, TableRow, TableCell,
   TableBody, Chip, Button, IconButton, TextField, MenuItem, CircularProgress, Alert
@@ -44,6 +29,19 @@ export default function MasterDashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [availableYears, setAvailableYears] = useState([new Date().getFullYear()]);
+
+  // Load available years on component mount
+  useEffect(() => {
+    const loadYears = async () => {
+      try {
+        const res = await dashboardAPI.getAvailableYears();
+        setAvailableYears(res.data.years || [new Date().getFullYear()]);
+      } catch (err) {
+        console.warn('Failed to load available years', err);
+      }
+    };
+    loadYears();
+  }, []);
 
   const loadDashboard = async () => {
     setLoading(true);
@@ -321,7 +319,7 @@ export default function MasterDashboard() {
                 select
                 size="small"
                 value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                onChange={(e) => setSelectedYear(e.target.value)}
                 sx={{
                   width: '80px',
                   '& .MuiOutlinedInput-root': { backgroundColor: '#fff', height: '28px' },
