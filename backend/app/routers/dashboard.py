@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+    # All authenticated users have accessfrom fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
@@ -15,25 +16,19 @@ def get_dashboard_summary(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Dashboard accessible to:
+    Dashboard accessible to all logged-in users:
     - Administrator: Full dashboard
     - TPM Manager: CI Project dashboard
     - Management: Executive dashboard (read-only)
     - Auditor: Read-only dashboard
+    - Engineer: CI Project list view
+    - QA Inspector: Verification dashboard
     
     Query Parameters:
     - year: Filter monthly KPI trends by year (e.g., 2024, 2025, 2026)
-    
-    Restricted for:
-    - Engineer: No dashboard access
-    - QA Inspector: No dashboard access
     """
-    # Block Engineer and QA Inspector from dashboard
-    if current_user.role in ["Engineer", "QA Inspector"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"{current_user.role} role does not have access to the dashboard"
-        )
+    # All authenticated users have access to dashboard
+    # RBAC is handled at component level (some sections may be hidden)
     
     # Use provided year or default to current year
     if year is None:
