@@ -11,33 +11,17 @@ router = APIRouter(prefix="/api/dashboard", tags=["Master Dashboard"])
 
 @router.get("")
 def get_dashboard_summary(
-    year: int = Query(None, description="Year for monthly KPI trends. None = All years combined (defaults to current year)"),
+    year: int = Query(None, description="Year for filtering (None=all years)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Dashboard accessible to all logged-in users:
-    - Administrator: Full dashboard
-    - TPM Manager: CI Project dashboard
-    - Management: Executive dashboard (read-only)
-    - Auditor: Read-only dashboard
-    - Engineer: CI Project list view
-    - QA Inspector: Verification dashboard
-    
+    Dashboard accessible to all logged-in users.
     Query Parameters:
     - year: Filter by year (2024, 2025, 2026) or None for all years combined
     """
-    # All authenticated users have access to dashboard
-    # RBAC is handled at component level (some sections may be hidden)
-    
-    # When year is None, calculate_kpis will use all projects
-    # Otherwise default to current year if not provided
-    if year is None:
-        # Check if this is a query for all years (frontend sends null/0) or just not provided
-        # For "All Years", we keep year as None to aggregate all projects
-        year = 0  # Use 0 as a special marker for "all years"
-    
-    return calculate_kpis(db, year if year != 0 else None)
+    # Pass year directly - None means all years
+    return calculate_kpis(db, year)
 
 
 @router.post("/snapshot/save-current-month")

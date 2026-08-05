@@ -9,10 +9,14 @@ def calculate_kpis(db: Session, year: int = None):
     """
     Calculate KPIs with REAL data from CI projects ONLY.
     Monthly trends calculated from close_date of completed projects.
+    If year=None: aggregate ALL projects from all years (All Years mode)
+    If year specified: filter to that specific year
     NO sample data, NO snapshots - fully dynamic.
     """
-    if year is None:
-        year = datetime.now().year
+    # Track if we're in "all years" mode
+    all_years_mode = (year is None)
+    # If year is None, set a default for monthly trend year field, but keep filtering as None
+    year_for_display = year if year is not None else datetime.now().year
     
     # Fetch KPI Targets from DB
     targets_db = db.query(KPITarget).all()
@@ -228,10 +232,10 @@ def calculate_kpis(db: Session, year: int = None):
         ],
         "monthly_kpi_trend": {
             "months": months,
-            "on_time_rate": monthly_on_time,  # All from CI projects, dynamically calculated
+            "on_time_rate": monthly_on_time,
             "effectiveness_rate": monthly_effectiveness,
             "avg_closing_time": monthly_avg_days,
-            "year": year
+            "year": year_for_display
         }
     }
 
