@@ -50,6 +50,8 @@ export const settingsAPI = {
   resetRolePassword: (roleId, data) => api.post(`/settings/roles/${roleId}/reset-password-for-users`, data),
   getCINumberingConfig: () => api.get('/admin/ci-numbering'),
   updateCINumberingConfig: (data) => api.put('/admin/ci-numbering', data),
+  getCurrentMode: () => api.get('/admin/mode'),
+  setMode: (mode) => api.put('/admin/mode', { mode }),
 };
 
 export const auditAPI = {

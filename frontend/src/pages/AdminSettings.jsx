@@ -51,6 +51,10 @@ export default function AdminSettings() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [formRole, setFormRole] = useState({ name: '', description: '' });
 
+  // Application Mode
+  const [appMode, setAppMode] = useState('production');
+  const [togglingMode, setTogglingMode] = useState(false);
+
   // CI Numbering
   const [ciParts, setCIParts] = useState([]);
   const [ciSeparator, setCISeparator] = useState('-');
@@ -74,6 +78,14 @@ export default function AdminSettings() {
         setUsers(resUsers.data);
         setRoles(resRoles.data);
         
+        // Load app mode
+        try {
+          const resMode = await settingsAPI.getCurrentMode();
+          setAppMode(resMode.data.mode);
+        } catch (err) {
+          console.warn('Failed to load app mode:', err);
+        }
+
         try {
           const resCI = await settingsAPI.getCINumberingConfig();
           setCIParts(resCI.data.parts || []);
@@ -244,6 +256,27 @@ export default function AdminSettings() {
     }
   };
 
+  // Application Mode Toggle
+  const handleToggleMode = async () => {
+    const newMode = appMode === 'demo' ? 'production' : 'demo';
+    setTogglingMode(true);
+    try {
+      await settingsAPI.setMode(newMode);
+      setAppMode(newMode);
+      setMsg({ 
+        open: true, 
+        text: `Switched to ${newMode.toUpperCase()} mode - Page will refresh in 2 seconds`, 
+        type: 'success' 
+      });
+      // Refresh page after 2 seconds to reload all data
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (err) {
+      setMsg({ open: true, text: err.response?.data?.detail || 'Failed to toggle mode', type: 'error' });
+    } finally {
+      setTogglingMode(false);
+    }
+  };
+
   // Password Change
   const handleChangePassword = async () => {
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
@@ -292,7 +325,8 @@ export default function AdminSettings() {
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
-          {isAdmin && <Tab label="CI Numbering" icon={<TuneIcon />} iconPosition="start" />}
+          {isAdmin && <Tab label="App Mode" icon={<TuneIcon />} iconPosition="start" />}
+          {isAdmin && <Tab label="CI Numbering" />}
           {isAdmin && <Tab label="KPI Targets" />}
           {isAdmin && <Tab label="User Management" />}
           {isAdmin && <Tab label="Role Management" />}
@@ -302,7 +336,7 @@ export default function AdminSettings() {
 
       {/* CI Numbering Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={0}>
+        <TabPanel value={tabValue} index={4}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={7}>
               <Card>
@@ -410,7 +444,7 @@ export default function AdminSettings() {
 
       {/* KPI Targets Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={1}>
+        <TabPanel value={tabValue} index={4}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: isDark ? '#f1f5f9' : '#1e293b' }}>KPI Target Configuration</Typography>
@@ -484,7 +518,7 @@ export default function AdminSettings() {
 
       {/* User Management Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={4}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -548,7 +582,7 @@ export default function AdminSettings() {
 
       {/* Role Management Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={3}>
+        <TabPanel value={tabValue} index={4}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -602,7 +636,7 @@ export default function AdminSettings() {
       )}
 
       {/* Change Password Tab */}
-      <TabPanel value={tabValue} index={isAdmin ? 4 : 0}>
+      <TabPanel value={tabValue} index={isAdmin ? 5 : 0}>
         <Card>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>

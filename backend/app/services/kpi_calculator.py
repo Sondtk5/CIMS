@@ -25,7 +25,20 @@ def calculate_kpis(db: Session, year: int = None):
     target_cost_saving = targets_map.get("cost_saving").target_value if targets_map.get("cost_saving") else 50000.0
     target_horizontal = targets_map.get("horizontal_deployment").target_value if targets_map.get("horizontal_deployment") else 3.0
 
-    all_projects = db.query(CIProject).all()
+    # Filter projects by year (based on start_date)
+    all_projects_raw = db.query(CIProject).all()
+    
+    # Filter by year for summary cards
+    all_projects = []
+    for p in all_projects_raw:
+        if p.start_date:
+            try:
+                start_dt = datetime.strptime(p.start_date, "%Y-%m-%d")
+                if start_dt.year == year:
+                    all_projects.append(p)
+            except Exception:
+                pass
+    
     total_projects = len(all_projects)
     
     complete_projects = [p for p in all_projects if p.status == "Complete"]

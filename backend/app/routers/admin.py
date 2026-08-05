@@ -129,3 +129,87 @@ def get_all_settings(
             for s in settings
         ]
     }
+
+# ===== DEMO / PRODUCTION MODE =====
+class ModeToggleRequest(BaseModel):
+    mode: str  # "demo" or "production"
+
+@router.get("/mode")
+def get_current_mode(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(["Administrator"]))
+):
+    """Get current application mode (demo or production)"""
+    setting = db.query(AdminSetting).filter(
+        AdminSetting.setting_key == "app_mode"
+    ).first()
+    
+    current_mode = "production"
+    if setting:
+        mode_value = setting.setting_value
+        if isinstance(mode_value, dict):
+            current_mode = mode_value.get("mode", "production")
+        elif isinstance(mode_value, str):
+            current_mode = mode_value
+    
+    return {
+        "mode": current_mode,
+        "description": "demo" if current_mode == "demo" else "production"
+    }
+
+@router.put("/mode")
+def toggle_app_mode(
+    request: ModeToggleRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(["Administrator"]))
+):
+    """Toggle between demo and production mode"""
+    from app.services.seed_data import seed_demo_data, clear_all_data
+    
+    mode = request.mode.lower()
+    if mode not in ["demo", "production"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mode must be 'demo' or 'production'"
+        )
+    
+    try:
+        # Get or create mode setting
+        setting = db.query(AdminSetting).filter(
+            AdminSetting.setting_key == "app_mode"
+        ).first()
+        
+        if not setting:
+            setting = AdminSetting(
+                setting_key="app_mode",
+                setting_value={"mode": mode},
+                description="Application mode: demo with sample data or production with clean slate"
+            )
+            db.add(setting)
+        else:
+            setting.setting_value = {"mode": mode}
+        
+        # If switching to demo, seed sample data
+        if mode == "demo":
+            # Clear existing CI projects first (optional - keep if you want merge)
+            # clear_all_data(db)
+            seed_demo_data(db)
+            message = "Switched to DEMO mode - Sample data loaded"
+        else:
+            # Switching to production - clear all sample data
+            clear_all_data(db)
+            message = "Switched to PRODUCTION mode - All data cleared. Start fresh!"
+        
+        db.commit()
+        
+        return {
+            "status": "success",
+            "mode": mode,
+            "message": message
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to toggle mode: {str(e)}"
+        )
