@@ -36,9 +36,9 @@ class CINumberingConfigResponse(BaseModel):
 @router.get("/ci-numbering", response_model=CINumberingConfigResponse)
 def get_ci_numbering_config(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles(["Administrator"]))
+    current_user: User = Depends(require_roles(["Administrator", "TPM Manager", "Engineer", "QA Inspector"]))
 ):
-    """Get current CI numbering configuration (Admin only)"""
+    """Get current CI numbering configuration (all users can read)"""
     return get_ci_numbering_format(db)
 
 # ===== Admin: Update CI Numbering Configuration =====
