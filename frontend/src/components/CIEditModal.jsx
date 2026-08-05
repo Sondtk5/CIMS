@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Tabs, Tab, Box, Typography,
   TextField, MenuItem, Grid, Card, CardContent, Table, TableHead, TableRow, TableCell,
-  TableBody, Chip, IconButton, Alert, Divider
+  TableBody, Chip, IconButton, Alert, Divider, Skeleton
 } from '@mui/material';
 import {
-  Close as CloseIcon, Print as PrintIcon, Save as SaveIcon, Delete as DeleteIcon, Add as AddIcon
+  Close as CloseIcon, Print as PrintIcon, Save as SaveIcon, Delete as DeleteIcon, Add as AddIcon, Refresh as RefreshIcon
 } from '@mui/icons-material';
 import CIRequestFormPrintView from './CIRequestFormPrintView';
 import CIReportPrintView from './CIReportPrintView';
-import { projectsAPI } from '../services/api';
+import { projectsAPI, settingsAPI } from '../services/api';
 
 export default function CIEditModal({ open, onClose, project, onSaved, onDelete }) {
   const [activeTab, setActiveTab] = useState(0);
@@ -17,6 +17,7 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
   const [formData, setFormData] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [generatingCI, setGeneratingCI] = useState(false);
 
   useEffect(() => {
     if (project) {
@@ -28,8 +29,25 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
         improve_stage: project.improve_stage || {},
         control_stage: project.control_stage || {},
       });
+      // Auto-generate CI if it's a new project (no id)
+      if (!project.id && !project.ci_no) {
+        generateNewCI();
+      }
     }
   }, [project]);
+
+  const generateNewCI = async () => {
+    setGeneratingCI(true);
+    try {
+      const res = await settingsAPI.getCINumberingConfig();
+      const example = res.data.example || 'AUTO';
+      setFormData((prev) => ({ ...prev, ci_no: example }));
+    } catch (err) {
+      console.error('Failed to generate CI:', err);
+    } finally {
+      setGeneratingCI(false);
+    }
+  };
 
   if (!project) return null;
 
@@ -103,7 +121,28 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
         {activeTab === 0 && (
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <TextField label="CI No." fullWidth size="small" value={formData.ci_no || ''} onChange={(e) => handleChange('ci_no', e.target.value)} disabled />
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+                <TextField 
+                  label="CI No." 
+                  fullWidth 
+                  size="small" 
+                  value={generatingCI ? 'Generating...' : (formData.ci_no || '')} 
+                  disabled 
+                  sx={{ flex: 1 }}
+                />
+                {!formData.id && (
+                  <Button 
+                    variant="outlined" 
+                    size="small" 
+                    startIcon={<RefreshIcon />}
+                    onClick={generateNewCI}
+                    disabled={generatingCI}
+                    sx={{ mb: 0.75 }}
+                  >
+                    Auto
+                  </Button>
+                )}
+              </Box>
             </Grid>
             <Grid item xs={6}>
               <TextField label="Project Title" fullWidth size="small" value={formData.title || ''} onChange={(e) => handleChange('title', e.target.value)} />

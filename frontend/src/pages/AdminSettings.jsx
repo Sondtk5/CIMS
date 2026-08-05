@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Card, CardContent, Typography, Table, TableHead, TableRow, TableCell, TableBody,
-  TextField, Button, Alert, Snackbar, Grid, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, IconButton
+  TextField, Button, Alert, Snackbar, Grid, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, IconButton, Switch, FormControlLabel
 } from '@mui/material';
-import { Save as SaveIcon, Settings as SettingsIcon, Lock as LockIcon, Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import { Save as SaveIcon, Settings as SettingsIcon, Lock as LockIcon, Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Tune as TuneIcon } from '@mui/icons-material';
 import { settingsAPI, authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -69,6 +69,13 @@ export default function AdminSettings() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [formRole, setFormRole] = useState({ name: '', description: '' });
 
+  // CI Numbering
+  const [ciConfig, setCIConfig] = useState(null);
+  const [ciParts, setCIParts] = useState([]);
+  const [ciSeparator, setCISeparator] = useState('-');
+  const [ciExample, setCIExample] = useState('');
+  const [savingCI, setSavingCI] = useState(false);
+
   // Password
   const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [changingPassword, setChangingPassword] = useState(false);
@@ -85,6 +92,17 @@ export default function AdminSettings() {
         setTargets(resTargets.data);
         setUsers(resUsers.data);
         setRoles(resRoles.data);
+        
+        // Load CI Numbering config
+        try {
+          const resCI = await settingsAPI.getCINumberingConfig();
+          setCIConfig(resCI.data);
+          setCIParts(resCI.data.parts || []);
+          setCISeparator(resCI.data.separator || '-');
+          setCIExample(resCI.data.example || '');
+        } catch (err) {
+          console.warn('Failed to load CI config:', err);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -121,6 +139,41 @@ export default function AdminSettings() {
       setMsg({ open: true, text: err.response?.data?.detail || 'Failed to update target', type: 'error' });
     } finally {
       setSavingKey(null);
+    }
+  };
+
+  // CI Numbering Handlers
+  const handleCIPartToggle = (index) => {
+    const updated = [...ciParts];
+    updated[index].enabled = !updated[index].enabled;
+    setCIParts(updated);
+  };
+
+  const handleCIPartValueChange = (index, value) => {
+    const updated = [...ciParts];
+    updated[index].value = value;
+    setCIParts(updated);
+  };
+
+  const handleCISeparatorChange = (value) => {
+    setCISeparator(value);
+  };
+
+  const handleSaveCI = async () => {
+    setSavingCI(true);
+    try {
+      const config_data = {
+        parts: ciParts,
+        separator: ciSeparator
+      };
+      const res = await settingsAPI.updateCINumberingConfig(config_data);
+      setMsg({ open: true, text: 'CI numbering configuration saved successfully', type: 'success' });
+      setCIExample(res.data.config.example);
+      setCIConfig(res.data.config);
+    } catch (err) {
+      setMsg({ open: true, text: err.response?.data?.detail || 'Failed to save CI configuration', type: 'error' });
+    } finally {
+      setSavingCI(false);
     }
   };
 
@@ -257,7 +310,7 @@ export default function AdminSettings() {
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 800 }}>Admin System Settings</Typography>
           <Typography variant="body2" sx={{ color: '#64748b' }}>
-            {isAdmin ? 'Configure KPI targets, user and role management' : 'Change your password'}
+            {isAdmin ? 'Configure system, KPI targets, users and roles' : 'Change your password'}
           </Typography>
         </Box>
       </Box>
@@ -265,6 +318,7 @@ export default function AdminSettings() {
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
+          {isAdmin && <Tab label="CI Numbering" icon={<TuneIcon />} iconPosition="start" />}
           {isAdmin && <Tab label="KPI Targets" />}
           {isAdmin && <Tab label="User Management" />}
           {isAdmin && <Tab label="Role Management" />}
@@ -272,9 +326,110 @@ export default function AdminSettings() {
         </Tabs>
       </Box>
 
-      {/* KPI Targets Tab */}
+      {/* CI Numbering Tab */}
       {isAdmin && (
         <TabPanel value={tabValue} index={0}>
+          <Grid container spacing={3}>
+            {/* Config Panel */}
+            <Grid item xs={12} md={7}>
+              <Card sx={{ borderLeft: '4px solid #2563eb' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                    <TuneIcon sx={{ color: '#2563eb' }} />
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>CI Project Numbering Configuration</Typography>
+                  </Box>
+
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>Numbering Parts</Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                      {ciParts.map((part, idx) => (
+                        <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1.5, backgroundColor: '#f8fafc', borderRadius: 1 }}>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={part.enabled}
+                                onChange={() => handleCIPartToggle(idx)}
+                                size="small"
+                              />
+                            }
+                            label={<Typography sx={{ fontWeight: 600, minWidth: '100px' }}>{part.name}</Typography>}
+                            sx={{ m: 0, flex: 0 }}
+                          />
+                          <TextField
+                            label="Value"
+                            size="small"
+                            value={part.value}
+                            onChange={(e) => handleCIPartValueChange(idx, e.target.value)}
+                            disabled={!part.enabled}
+                            sx={{ minWidth: '100px' }}
+                          />
+                          {part.auto_increment && (
+                            <Typography variant="caption" sx={{ color: '#0891b2', backgroundColor: '#cffafe', px: 1, py: 0.5, borderRadius: 0.5, fontWeight: 600 }}>
+                              AUTO-INCREMENT
+                            </Typography>
+                          )}
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Separator</Typography>
+                    <TextField
+                      label="Separator"
+                      size="small"
+                      value={ciSeparator}
+                      onChange={(e) => handleCISeparatorChange(e.target.value)}
+                      sx={{ width: '150px' }}
+                    />
+                  </Box>
+
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<SaveIcon />}
+                    onClick={handleSaveCI}
+                    disabled={savingCI}
+                    fullWidth
+                  >
+                    {savingCI ? 'Saving...' : 'Save Configuration'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Preview Panel */}
+            <Grid item xs={12} md={5}>
+              <Card sx={{ borderLeft: '4px solid #059669', backgroundColor: '#f0fdf4' }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>Preview & Info</Typography>
+                  
+                  <Box sx={{ mb: 3, p: 2, backgroundColor: '#fff', border: '2px dashed #059669', borderRadius: 1 }}>
+                    <Typography variant="caption" sx={{ color: '#64748b' }}>Next CI Number:</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 800, fontFamily: 'monospace', color: '#059669', mt: 1 }}>
+                      {ciExample}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ p: 2, backgroundColor: '#f0fdf4', border: '1px solid #dcfce7', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#065f46' }}>Format Guide:</Typography>
+                    <Box component="ul" sx={{ m: 0, pl: 2, color: '#047857' }}>
+                      <li><Typography variant="caption"><strong>Enabled parts:</strong> Will appear in CI number</Typography></li>
+                      <li><Typography variant="caption"><strong>Toggle:</strong> Turn parts ON/OFF to customize format</Typography></li>
+                      <li><Typography variant="caption"><strong>Auto-increment:</strong> Counter increases with each project</Typography></li>
+                      <li><Typography variant="caption"><strong>Year:</strong> Auto-filled with current year (2-digit)</Typography></li>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </TabPanel>
+      )}
+
+      {/* KPI Targets Tab */}
+      {isAdmin && (
+        <TabPanel value={tabValue} index={1}>
           <Card sx={{ borderLeft: '4px solid #1565C0' }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>KPI Target Configuration</Typography>
@@ -343,7 +498,7 @@ export default function AdminSettings() {
 
       {/* User Management Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={1}>
+        <TabPanel value={tabValue} index={2}>
           <Card sx={{ borderLeft: '4px solid #2E7D32' }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -412,7 +567,7 @@ export default function AdminSettings() {
 
       {/* Role Management Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={3}>
           <Card sx={{ borderLeft: '4px solid #DC2626' }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -471,7 +626,7 @@ export default function AdminSettings() {
       )}
 
       {/* Change Password Tab */}
-      <TabPanel value={tabValue} index={isAdmin ? 3 : 0}>
+      <TabPanel value={tabValue} index={isAdmin ? 4 : 0}>
         <Card sx={{ borderLeft: '4px solid #8b5cf6' }}>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
