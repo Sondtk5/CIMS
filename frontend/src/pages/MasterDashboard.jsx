@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, Table, TableHead, TableRow, TableCell,
-  TableBody, Chip, Button, IconButton, TextField, MenuItem, CircularProgress, Alert
+  TableBody, Chip, Button, IconButton, TextField, MenuItem, CircularProgress, Alert, useTheme
 } from '@mui/material';
 import {
   FolderSpecial as TotalIcon,
@@ -22,6 +22,8 @@ import CIEditModal from '../components/CIEditModal';
 import * as XLSX from 'xlsx';
 
 export default function MasterDashboard() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [data, setData] = useState(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -118,7 +120,7 @@ export default function MasterDashboard() {
   // Chart options matching Image 3 Donut & Line charts
   const statusDonutOption = {
     tooltip: { trigger: 'item' },
-    legend: { bottom: '2%', left: 'center', textStyle: { fontSize: 9 }, itemWidth: 20 },
+    legend: { bottom: '2%', left: 'center', textStyle: { fontSize: 9, color: isDark ? '#cbd5e1' : '#000' }, itemWidth: 20 },
     color: ['#2E7D32', '#ED6C02', '#94a3b8'],
     series: [{
       name: 'Project Status',
@@ -126,14 +128,15 @@ export default function MasterDashboard() {
       center: ['50%', '40%'],
       radius: ['35%', '58%'],
       avoidLabelOverlap: true,
-      label: { show: true, formatter: '{b}\n({d}%)', fontSize: 10, padding: 4 },
+      label: { show: true, formatter: '{b}\n({d}%)', fontSize: 10, padding: 4, color: isDark ? '#e2e8f0' : '#000' },
+      itemStyle: { borderColor: isDark ? '#1e293b' : '#fff', borderWidth: 2 },
       data: project_status_distribution
     }]
   };
 
   const categoryDonutOption = {
     tooltip: { trigger: 'item' },
-    legend: { bottom: '2%', left: 'center', textStyle: { fontSize: 9 }, itemWidth: 20 },
+    legend: { bottom: '2%', left: 'center', textStyle: { fontSize: 9, color: isDark ? '#cbd5e1' : '#000' }, itemWidth: 20 },
     color: ['#1565C0', '#2E7D32', '#ED6C02', '#8b5cf6', '#0288D1'],
     series: [{
       name: 'Project Category',
@@ -141,23 +144,24 @@ export default function MasterDashboard() {
       center: ['50%', '40%'],
       radius: ['35%', '58%'],
       avoidLabelOverlap: true,
-      label: { show: true, formatter: '{d}%', fontSize: 10, padding: 4 },
+      label: { show: true, formatter: '{d}%', fontSize: 10, padding: 4, color: isDark ? '#e2e8f0' : '#000' },
+      itemStyle: { borderColor: isDark ? '#1e293b' : '#fff', borderWidth: 2 },
       data: project_category_distribution
     }]
   };
   const monthlyTrendOption = {
-    tooltip: { trigger: 'axis' },
-    legend: { top: '0%' },
-    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-    xAxis: { type: 'category', data: monthly_kpi_trend.months },
+    tooltip: { trigger: 'axis', backgroundColor: isDark ? '#1e293b' : '#fff', textStyle: { color: isDark ? '#e2e8f0' : '#000' }, borderColor: isDark ? '#475569' : '#ccc' },
+    legend: { top: '0%', textStyle: { color: isDark ? '#cbd5e1' : '#000' } },
+    grid: { left: '3%', right: '4%', bottom: '3%', top: '8%', containLabel: true, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.5)' : 'transparent' },
+    xAxis: { type: 'category', data: monthly_kpi_trend.months, axisLabel: { color: isDark ? '#94a3b8' : '#666' }, axisLine: { lineStyle: { color: isDark ? '#475569' : '#ccc' } } },
     yAxis: [
-      { type: 'value', name: 'Rate (%)', max: 100 },
-      { type: 'value', name: 'Days', max: 60 }
+      { type: 'value', name: 'Rate (%)', max: 100, axisLabel: { color: isDark ? '#94a3b8' : '#666' }, axisLine: { lineStyle: { color: isDark ? '#475569' : '#ccc' } }, splitLine: { lineStyle: { color: isDark ? '#334155' : '#e0e0e0' } } },
+      { type: 'value', name: 'Days', max: 60, axisLabel: { color: isDark ? '#94a3b8' : '#666' }, axisLine: { lineStyle: { color: isDark ? '#475569' : '#ccc' } }, splitLine: { lineStyle: { color: isDark ? '#334155' : '#e0e0e0' } } }
     ],
     series: [
-      { name: 'On-time Completion Rate (%)', type: 'line', data: monthly_kpi_trend.on_time_rate, color: '#1565C0' },
-      { name: 'Effectiveness Rate (%)', type: 'line', data: monthly_kpi_trend.effectiveness_rate, color: '#2E7D32' },
-      { name: 'Avg Closing Time (Days)', type: 'line', yAxisIndex: 1, data: monthly_kpi_trend.avg_closing_time, color: '#8b5cf6' }
+      { name: 'On-time Completion Rate (%)', type: 'line', data: monthly_kpi_trend.on_time_rate, color: '#1565C0', lineStyle: { width: 2 }, itemStyle: { borderWidth: 0 } },
+      { name: 'Effectiveness Rate (%)', type: 'line', data: monthly_kpi_trend.effectiveness_rate, color: '#2E7D32', lineStyle: { width: 2 }, itemStyle: { borderWidth: 0 } },
+      { name: 'Avg Closing Time (Days)', type: 'line', yAxisIndex: 1, data: monthly_kpi_trend.avg_closing_time, color: '#8b5cf6', lineStyle: { width: 2 }, itemStyle: { borderWidth: 0 } }
     ]
   };
 
@@ -292,11 +296,11 @@ export default function MasterDashboard() {
 
         {/* Section 2: Project Status Donut */}
         <Grid item xs={2.2}>
-          <Card sx={{ height: '260px' }}>
+          <Card sx={{ height: '260px', backgroundColor: isDark ? '#1e293b' : '#fff' }}>
             <Box sx={{ backgroundColor: '#0F172A', color: '#fff', px: 1.5, py: 0.8 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>2. PROJECT STATUS</Typography>
             </Box>
-            <Box sx={{ height: '210px', p: 0.5 }}>
+            <Box sx={{ height: '210px', p: 0.5, backgroundColor: isDark ? '#0f172a' : '#fff' }}>
               <ReactECharts option={statusDonutOption} style={{ height: '100%', width: '100%' }} />
             </Box>
           </Card>
@@ -304,11 +308,11 @@ export default function MasterDashboard() {
 
         {/* Section 3: Project Category Donut */}
         <Grid item xs={2.4}>
-          <Card sx={{ height: '260px' }}>
+          <Card sx={{ height: '260px', backgroundColor: isDark ? '#1e293b' : '#fff' }}>
             <Box sx={{ backgroundColor: '#0F172A', color: '#fff', px: 1.5, py: 0.8 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>3. PROJECT CATEGORY</Typography>
             </Box>
-            <Box sx={{ height: '210px', p: 0.5 }}>
+            <Box sx={{ height: '210px', p: 0.5, backgroundColor: isDark ? '#0f172a' : '#fff' }}>
               <ReactECharts option={categoryDonutOption} style={{ height: '100%', width: '100%' }} />
             </Box>
           </Card>
@@ -316,14 +320,14 @@ export default function MasterDashboard() {
 
         {/* Section 4: Monthly KPI Trend Chart */}
         <Grid item xs={4.2}>
-          <Card sx={{ height: '260px' }}>
+          <Card sx={{ height: '260px', backgroundColor: isDark ? '#1e293b' : '#fff' }}>
             <Box sx={{ backgroundColor: '#0F172A', color: '#fff', px: 1.5, py: 0.8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.8rem' }}>4. MONTHLY KPI TREND</Typography>
               <TextField
                 select
                 size="small"
                 value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                 sx={{
                   width: '80px',
                   '& .MuiOutlinedInput-root': { backgroundColor: '#fff', height: '28px' },
@@ -335,7 +339,7 @@ export default function MasterDashboard() {
                 ))}
               </TextField>
             </Box>
-            <Box sx={{ height: '210px', p: 0.5 }}>
+            <Box sx={{ height: '210px', p: 0.5, backgroundColor: isDark ? '#0f172a' : '#fff' }}>
               <ReactECharts option={monthlyTrendOption} style={{ height: '100%', width: '100%' }} />
             </Box>
           </Card>
