@@ -2,9 +2,10 @@ from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
-Base = declarative_base()
+# Create a simple declarative base for this module
+DeclarativeBase = declarative_base()
 
-class ModeLog(Base):
+class ModeLog(DeclarativeBase):
     __tablename__ = 'mode_logs'
     
     id = Column(Integer, primary_key=True, index=True)

@@ -2,13 +2,13 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.database import Base, engine
+from app.database import Base, engine, init_db
 from app.routers import auth, projects, dashboard, settings, reports, audit, roles, admin
 from app.seed import seed_db
 from app.models.monthly_kpi_snapshot import MonthlyKPISnapshot  # Import to register model
 
-# Initialize database schema
-Base.metadata.create_all(bind=engine)
+# Initialize database schema (creates all tables including ModeLog)
+init_db()
 
 # Auto seed database on startup
 seed_db()
