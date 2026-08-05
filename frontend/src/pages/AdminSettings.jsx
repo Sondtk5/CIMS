@@ -4,7 +4,7 @@ import { Save as SaveIcon, Tune as TuneIcon } from '@mui/icons-material';
 import { settingsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-export default function AdminSettingsTest() {
+export default function AdminSettings() {
   const { user } = useAuth();
   const isAdmin = user?.role === 'Administrator';
 
