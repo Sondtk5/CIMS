@@ -157,8 +157,8 @@ export default function MasterDashboard() {
   };
   const monthlyTrendOption = {
     tooltip: { trigger: 'axis', backgroundColor: isDark ? '#1e293b' : '#fff', textStyle: { color: isDark ? '#e2e8f0' : '#000' }, borderColor: isDark ? '#475569' : '#ccc' },
-    legend: { top: '0%', textStyle: { color: isDark ? '#cbd5e1' : '#000', fontSize: 11 }, itemGap: 20 },
-    grid: { left: '8%', right: '12%', bottom: '20%', top: '20%', containLabel: false },
+    legend: { top: '2%', textStyle: { color: isDark ? '#cbd5e1' : '#000', fontSize: 10 }, itemGap: 15, orient: 'horizontal' },
+    grid: { left: '8%', right: '8%', bottom: '18%', top: '30%', containLabel: false },
     xAxis: { type: 'category', data: monthly_kpi_trend.months, axisLabel: { color: isDark ? '#94a3b8' : '#666', fontSize: 11, margin: 10 }, axisLine: { lineStyle: { color: isDark ? '#475569' : '#ccc' } } },
     yAxis: [
       { type: 'value', name: 'Rate (%)', nameTextStyle: { color: isDark ? '#94a3b8' : '#666', fontSize: 10 }, max: 100, axisLabel: { color: isDark ? '#94a3b8' : '#666', fontSize: 10 }, axisLine: { lineStyle: { color: isDark ? '#475569' : '#ccc' } }, splitLine: { lineStyle: { color: isDark ? '#334155' : '#e0e0e0' } } },
@@ -346,7 +346,7 @@ export default function MasterDashboard() {
                 ))}
               </TextField>
             </Box>
-            <Box sx={{ height: '210px', p: 0.5, backgroundColor: isDark ? '#0f172a' : '#fff' }}>
+            <Box sx={{ height: '210px', p: 0.5, backgroundColor: isDark ? '#0f172a' : '#fff', overflow: 'hidden' }}>
               <ReactECharts option={monthlyTrendOption} style={{ height: '100%', width: '100%' }} />
             </Box>
           </Card>
