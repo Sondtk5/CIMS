@@ -4,6 +4,8 @@ from app.database import get_db
 from app.core.rbac import require_roles, get_current_user
 from app.models.user import User
 from app.models.admin_setting import AdminSetting
+from app.models.mode_log import ModeLog
+from datetime import datetime
 from app.services.ci_numbering_service import (
     get_or_create_ci_numbering_config,
     update_ci_numbering_config,
@@ -200,6 +202,16 @@ def toggle_app_mode(
             clear_all_data(db)
             message = "Switched to PRODUCTION mode - All data cleared. Start fresh!"
         
+        # Log the mode change
+        mode_log = ModeLog(
+            mode=mode.upper(),
+            action=f"Switched to {mode.upper()} Mode",
+            timestamp=datetime.utcnow(),
+            user=current_user.username,
+            details=message
+        )
+        db.add(mode_log)
+        
         db.commit()
         
         return {
@@ -212,4 +224,37 @@ def toggle_app_mode(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to toggle mode: {str(e)}"
+        )
+
+
+# ===== Mode Logs / Tracking =====
+@router.get("/mode/logs")
+def get_mode_logs(
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(["Administrator"]))
+):
+    """Get mode change tracking logs (DEMO or PRODUCTION only)"""
+    try:
+        logs = db.query(ModeLog).order_by(ModeLog.timestamp.desc()).limit(limit).all()
+        
+        return {
+            "status": "success",
+            "count": len(logs),
+            "logs": [
+                {
+                    "id": log.id,
+                    "mode": log.mode,
+                    "action": log.action,
+                    "timestamp": log.timestamp.isoformat(),
+                    "user": log.user,
+                    "details": log.details
+                }
+                for log in logs
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve logs: {str(e)}"
         )

@@ -356,7 +356,7 @@ export default function AdminSettings() {
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: isDark ? '#86efac' : '#16a34a', mb: 1 }}>✓ DEMO Mode</Typography>
                       <Box component="ul" sx={{ m: 0, pl: 2, color: isDark ? '#6ee7b7' : '#047857' }}>
-                        <li><Typography variant="caption" sx={{ color: 'inherit' }}>Includes 8 sample CI projects (2024-2026)</Typography></li>
+                        <li><Typography variant="caption" sx={{ color: 'inherit' }}>Includes 133 sample CI projects (2024=20, 2025=45, 2026=68)</Typography></li>
                         <li><Typography variant="caption" sx={{ color: 'inherit' }}>Mix of Complete, Running, and Pending statuses</Typography></li>
                         <li><Typography variant="caption" sx={{ color: 'inherit' }}>All dashboard KPIs auto-calculated from sample data</Typography></li>
                       </Box>
