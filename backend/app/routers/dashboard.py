@@ -66,14 +66,14 @@ def get_available_years(
     Get list of available years from CI projects (based on start_date).
     Returns sorted list of unique years from all CI projects.
     """
-    from sqlalchemy import func
+    from sqlalchemy import func, cast, Integer
     from app.models.ci_project import CIProject
     
     # Get unique years from CI projects start_date
     years_result = db.query(
-        func.cast(
+        cast(
             func.substr(CIProject.start_date, 1, 4),
-            db.Integer
+            Integer
         ).distinct()
     ).filter(
         CIProject.start_date.isnot(None)
