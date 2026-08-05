@@ -126,8 +126,10 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
                   label="CI No." 
                   fullWidth 
                   size="small" 
-                  value={generatingCI ? 'Generating...' : (formData.ci_no || '')} 
-                  disabled 
+                  value={formData.ci_no || ''} 
+                  onChange={(e) => handleChange('ci_no', e.target.value)}
+                  disabled={formData.id ? true : false} 
+                  placeholder="Auto-filled or enter manually"
                   sx={{ flex: 1 }}
                 />
                 {!formData.id && (
@@ -138,6 +140,7 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
                     onClick={generateNewCI}
                     disabled={generatingCI}
                     sx={{ mb: 0.75 }}
+                    title="Refresh with latest auto-generated CI number from setting"
                   >
                     Auto
                   </Button>
