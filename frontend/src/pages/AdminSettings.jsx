@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Card, CardContent, Typography, Table, TableHead, TableRow, TableCell, TableBody,
-  TextField, Button, Alert, Snackbar, Grid, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, IconButton, Switch, FormControlLabel
+  TextField, Button, Alert, Snackbar, Grid, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, IconButton, Switch, FormControlLabel, useTheme
 } from '@mui/material';
 import { Save as SaveIcon, Settings as SettingsIcon, Lock as LockIcon, Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Tune as TuneIcon } from '@mui/icons-material';
 import { settingsAPI, authAPI } from '../services/api';
@@ -17,6 +17,7 @@ function TabPanel(props) {
 }
 
 export default function AdminSettings() {
+  const theme = useTheme();
   const { user } = useAuth();
   const isAdmin = user?.role === 'Administrator';
 
@@ -282,7 +283,7 @@ export default function AdminSettings() {
         <SettingsIcon color="primary" sx={{ fontSize: 32 }} />
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 800 }}>Admin System Settings</Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
+          <Typography variant="body2" sx={{ color: theme.palette.mode === 'dark' ? '#94a3b8' : '#64748b' }}>
             {isAdmin ? 'Configure system settings, KPI targets, users and roles' : 'Change your password'}
           </Typography>
         </Box>
@@ -309,7 +310,10 @@ export default function AdminSettings() {
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>CI Project Numbering Configuration</Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
                     {ciParts.map((part, idx) => (
-                      <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1.5, backgroundColor: '#f8fafc', borderRadius: 1 }}>
+                      <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1.5, 
+                        backgroundColor: theme.palette.mode === 'dark' ? '#334155' : '#f8fafc', 
+                        borderRadius: 1 
+                      }}>
                         <FormControlLabel
                           control={
                             <Switch
@@ -330,7 +334,11 @@ export default function AdminSettings() {
                           sx={{ minWidth: '100px' }}
                         />
                         {part.auto_increment && (
-                          <Typography variant="caption" sx={{ color: '#0891b2', backgroundColor: '#cffafe', px: 1, py: 0.5, borderRadius: 0.5, fontWeight: 600 }}>
+                          <Typography variant="caption" sx={{ 
+                            color: theme.palette.mode === 'dark' ? '#06b6d4' : '#0891b2', 
+                            backgroundColor: theme.palette.mode === 'dark' ? '#164e63' : '#cffafe', 
+                            px: 1, py: 0.5, borderRadius: 0.5, fontWeight: 600 
+                          }}>
                             AUTO-INCREMENT
                           </Typography>
                         )}
@@ -361,18 +369,29 @@ export default function AdminSettings() {
               </Card>
             </Grid>
             <Grid item xs={12} md={5}>
-              <Card sx={{ borderLeft: '4px solid #059669', backgroundColor: '#f0fdf4' }}>
+              <Card sx={{ 
+                borderLeft: '4px solid #059669',
+                backgroundColor: theme.palette.mode === 'dark' ? '#164e3f' : '#f0fdf4'
+              }}>
                 <CardContent>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>Preview</Typography>
-                  <Box sx={{ mb: 3, p: 2, backgroundColor: '#fff', border: '2px dashed #059669', borderRadius: 1 }}>
-                    <Typography variant="caption" sx={{ color: '#64748b' }}>Next CI Number:</Typography>
+                  <Box sx={{ mb: 3, p: 2, 
+                    backgroundColor: theme.palette.mode === 'dark' ? '#1e293b' : '#fff',
+                    border: '2px dashed #059669', 
+                    borderRadius: 1 
+                  }}>
+                    <Typography variant="caption" sx={{ color: theme.palette.mode === 'dark' ? '#cbd5e1' : '#64748b' }}>Next CI Number:</Typography>
                     <Typography variant="h5" sx={{ fontWeight: 800, fontFamily: 'monospace', color: '#059669', mt: 1 }}>
                       {ciExample}
                     </Typography>
                   </Box>
-                  <Box sx={{ p: 2, backgroundColor: '#f0fdf4', border: '1px solid #dcfce7', borderRadius: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#065f46' }}>Format Guide:</Typography>
-                    <Box component="ul" sx={{ m: 0, pl: 2, color: '#047857' }}>
+                  <Box sx={{ p: 2, 
+                    backgroundColor: theme.palette.mode === 'dark' ? '#164e3f' : '#f0fdf4', 
+                    border: '1px solid #dcfce7', 
+                    borderRadius: 1 
+                  }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: theme.palette.mode === 'dark' ? '#a7f3d0' : '#065f46' }}>Format Guide:</Typography>
+                    <Box component="ul" sx={{ m: 0, pl: 2, color: theme.palette.mode === 'dark' ? '#6ee7b7' : '#047857' }}>
                       <li><Typography variant="caption">Enabled parts: Will appear in CI number</Typography></li>
                       <li><Typography variant="caption">Toggle: Turn parts ON/OFF to customize</Typography></li>
                       <li><Typography variant="caption">Auto-increment: Counter increases with each project</Typography></li>
@@ -393,7 +412,7 @@ export default function AdminSettings() {
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>KPI Target Configuration</Typography>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f1f5f9' }}>
+                  <TableRow sx={{ backgroundColor: theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9' }}>
                     <TableCell sx={{ fontWeight: 'bold' }}>KPI Metric Name</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Operator</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Target Threshold Value</TableCell>
@@ -462,7 +481,7 @@ export default function AdminSettings() {
               </Box>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f1f5f9' }}>
+                  <TableRow sx={{ backgroundColor: theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9' }}>
                     <TableCell sx={{ fontWeight: 'bold' }}>Username</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Full Name</TableCell>
@@ -516,7 +535,7 @@ export default function AdminSettings() {
               </Box>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f1f5f9' }}>
+                  <TableRow sx={{ backgroundColor: theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9' }}>
                     <TableCell sx={{ fontWeight: 'bold' }}>Role Name</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Created At</TableCell>
@@ -528,7 +547,7 @@ export default function AdminSettings() {
                     <TableRow key={r.id} hover>
                       <TableCell sx={{ fontWeight: 600 }}>{r.name}</TableCell>
                       <TableCell>{r.description}</TableCell>
-                      <TableCell sx={{ fontSize: '0.85rem', color: '#64748b' }}>
+                      <TableCell sx={{ fontSize: '0.85rem', color: theme.palette.mode === 'dark' ? '#94a3b8' : '#64748b' }}>
                         {new Date(r.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
