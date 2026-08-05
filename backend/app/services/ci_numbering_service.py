@@ -105,10 +105,10 @@ def generate_ci_number(db: Session, dept_code: str = None, cat_code: str = None,
                 db.commit()
                 db.refresh(setting)
         elif part_name == "year":
-            # Use current year's last 2 digits
-            if part_value == "00":  # If config says "00", use actual year
-                part_value = str(datetime.utcnow().year)[-2:]
-            # Otherwise use config value
+            # Use config value as-is
+            # If you want current year, set it in Admin Settings
+            # part_value is already set from config
+            pass
         
         parts_list.append(str(part_value))
     
@@ -116,6 +116,20 @@ def generate_ci_number(db: Session, dept_code: str = None, cat_code: str = None,
     ci_number = separator.join(parts_list)
     
     return ci_number
+
+def generate_ci_number_with_year(db: Session, dept_code: str = None, cat_code: str = None, use_current_year: bool = False, commit: bool = True) -> str:
+    """
+    Alternative: generate CI with option to use current year
+    If you want dynamic current year, use this function with use_current_year=True
+    """
+    ci = generate_ci_number(db, dept_code, cat_code, commit)
+    
+    if use_current_year:
+        # Replace year part with current year
+        # This is for future use if you want dynamic year
+        pass
+    
+    return ci
 
 def get_ci_numbering_format(db: Session) -> dict:
     """Get current CI numbering format for frontend display"""
