@@ -7,9 +7,9 @@ from datetime import datetime
 
 def calculate_kpis(db: Session, year: int = None):
     """
-    Calculate KPIs with real data from CI projects.
-    If year is provided, fetch monthly trends from DB.
-    Otherwise, use current year.
+    Calculate KPIs with REAL data from CI projects ONLY.
+    Monthly trends calculated from close_date of completed projects.
+    NO sample data, NO snapshots - fully dynamic.
     """
     if year is None:
         year = datetime.now().year
@@ -134,65 +134,59 @@ def calculate_kpis(db: Session, year: int = None):
         cat = p.category or "Others"
         category_counts[cat] = category_counts.get(cat, 0) + 1
 
-    # Monthly trend calculation
+    # ====== MONTHLY TREND: 100% DYNAMIC FROM CI PROJECTS ======
+    # Calculate for ALL months based on close_date of completed CI projects
+    # NO database snapshots, NO sample data - pure real data
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     monthly_on_time = [None] * 12
     monthly_effectiveness = [None] * 12
     monthly_avg_days = [None] * 12
     
-    # Fetch monthly snapshots from DB for the selected year
-    snapshots = db.query(MonthlyKPISnapshot).filter(
-        MonthlyKPISnapshot.year == year
-    ).all()
-    
-    # Populate arrays with DB data where available
-    for snapshot in snapshots:
-        idx = snapshot.month - 1  # Convert 1-12 to 0-11
-        if 0 <= idx < 12:
-            monthly_on_time[idx] = snapshot.on_time_completion_rate
-            monthly_effectiveness[idx] = snapshot.effectiveness_rate
-            monthly_avg_days[idx] = snapshot.avg_closing_days
-    
-    # CALCULATE MISSING MONTHS from CI projects based on close_date
-    # For any month without snapshot data, calculate from projects closed in that month
+    # For each month, calculate KPIs from projects closed in that month/year
     for month_idx in range(12):
-        if monthly_on_time[month_idx] is None:  # Month has no snapshot data
-            # Calculate KPIs for projects closed in this month/year
-            month_num = month_idx + 1
+        month_num = month_idx + 1  # 1-12
+        
+        # Find all COMPLETED projects with close_date in this month/year
+        month_complete_projects = []
+        for p in complete_projects:
+            if p.close_date:
+                try:
+                    close_dt = datetime.strptime(p.close_date, "%Y-%m-%d")
+                    if close_dt.year == year and close_dt.month == month_num:
+                        month_complete_projects.append(p)
+                except Exception:
+                    pass
+        
+        # If there are completed projects in this month, calculate KPIs
+        if month_complete_projects:
+            # On-time rate
+            month_on_time_count = sum(1 for p in month_complete_projects 
+                                     if p.close_date and p.due_date and p.close_date <= p.due_date)
+            monthly_on_time[month_idx] = round((month_on_time_count / len(month_complete_projects) * 100), 1)
             
-            month_complete_projects = []
-            for p in complete_projects:
-                if p.close_date:
+            # Effectiveness rate (PASS projects)
+            month_pass_count = sum(1 for p in month_complete_projects if p.result == "PASS")
+            monthly_effectiveness[month_idx] = round((month_pass_count / len(month_complete_projects) * 100), 1)
+            
+            # Average closing days
+            month_closing_days = []
+            for p in month_complete_projects:
+                if p.closing_days is not None:
+                    month_closing_days.append(p.closing_days)
+                elif p.start_date and p.close_date:
                     try:
-                        close_dt = datetime.strptime(p.close_date, "%Y-%m-%d")
-                        if close_dt.year == year and close_dt.month == month_num:
-                            month_complete_projects.append(p)
+                        d1 = datetime.strptime(p.start_date, "%Y-%m-%d")
+                        d2 = datetime.strptime(p.close_date, "%Y-%m-%d")
+                        days = (d2 - d1).days
+                        month_closing_days.append(max(days, 0))
                     except Exception:
                         pass
             
-            if month_complete_projects:
-                # Calculate on-time rate for this month
-                month_on_time_count = sum(1 for p in month_complete_projects 
-                                         if p.close_date and p.due_date and p.close_date <= p.due_date)
-                monthly_on_time[month_idx] = round((month_on_time_count / len(month_complete_projects) * 100), 1)
-                
-                # Calculate effectiveness rate for this month
-                month_pass_count = sum(1 for p in month_complete_projects if p.result == "PASS")
-                monthly_effectiveness[month_idx] = round((month_pass_count / len(month_complete_projects) * 100), 1)
-                
-                # Calculate average closing days for this month
-                month_closing_days = [p.closing_days for p in month_complete_projects if p.closing_days is not None]
-                if month_closing_days:
-                    monthly_avg_days[month_idx] = round(sum(month_closing_days) / len(month_closing_days), 1)
-                else:
-                    monthly_avg_days[month_idx] = 0.0
-    
-    # Fill current month with today's calculated values (only if in current year and no snapshot exists)
-    current_month = datetime.now().month - 1  # 0-11
-    if year == datetime.now().year and monthly_on_time[current_month] is None:
-        monthly_on_time[current_month] = on_time_rate
-        monthly_effectiveness[current_month] = effectiveness_rate
-        monthly_avg_days[current_month] = avg_closing_days
+            if month_closing_days:
+                monthly_avg_days[month_idx] = round(sum(month_closing_days) / len(month_closing_days), 1)
+            else:
+                monthly_avg_days[month_idx] = 0.0
+        # If no completed projects in this month, leave as None (no data to show)
 
     return {
         "summary_cards": {
@@ -217,7 +211,7 @@ def calculate_kpis(db: Session, year: int = None):
         ],
         "monthly_kpi_trend": {
             "months": months,
-            "on_time_rate": monthly_on_time,
+            "on_time_rate": monthly_on_time,  # All from CI projects, dynamically calculated
             "effectiveness_rate": monthly_effectiveness,
             "avg_closing_time": monthly_avg_days,
             "year": year
@@ -227,8 +221,9 @@ def calculate_kpis(db: Session, year: int = None):
 
 def save_current_month_snapshot(db: Session):
     """
-    Save current month's KPI metrics as a snapshot.
-    Call this at end of each month or manually.
+    [DEPRECATED] This function is no longer needed.
+    Monthly KPI trends are now 100% calculated from CI projects in real-time.
+    Keeping for backwards compatibility but it's not used.
     """
     now = datetime.now()
     year = now.year
