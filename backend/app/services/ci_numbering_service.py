@@ -1,0 +1,130 @@
+from sqlalchemy.orm import Session
+from app.models.admin_setting import AdminSetting
+from datetime import datetime
+import json
+
+DEFAULT_CI_NUMBERING_CONFIG = {
+    "parts": [
+        {"name": "prefix", "value": "UTIV", "enabled": True, "auto_increment": False},
+        {"name": "department", "value": "EN", "enabled": True, "auto_increment": False},
+        {"name": "category", "value": "R", "enabled": True, "auto_increment": False},
+        {"name": "year", "value": "00", "enabled": True, "auto_increment": False},
+        {"name": "sequence", "value": "0000", "enabled": True, "auto_increment": False},
+        {"name": "version", "value": "00", "enabled": True, "auto_increment": False},
+        {"name": "counter", "value": "000", "enabled": True, "auto_increment": True}  # Auto-increment by default
+    ],
+    "separator": "-",
+    "next_counter": 1,
+    "last_updated": datetime.utcnow().isoformat()
+}
+
+def get_or_create_ci_numbering_config(db: Session):
+    """Get CI numbering config from DB or create default"""
+    setting = db.query(AdminSetting).filter(
+        AdminSetting.setting_key == "ci_numbering_config"
+    ).first()
+    
+    if not setting:
+        # Create default config
+        setting = AdminSetting(
+            setting_key="ci_numbering_config",
+            setting_value=DEFAULT_CI_NUMBERING_CONFIG,
+            description="CI Project numbering convention configuration"
+        )
+        db.add(setting)
+        db.commit()
+        db.refresh(setting)
+    
+    return setting
+
+def update_ci_numbering_config(db: Session, config_data: dict):
+    """Update CI numbering config"""
+    setting = get_or_create_ci_numbering_config(db)
+    
+    # Merge with existing config, preserve next_counter
+    current_value = setting.setting_value.copy() if isinstance(setting.setting_value, dict) else {}
+    next_counter = current_value.get("next_counter", 1)
+    
+    config_data["next_counter"] = next_counter
+    config_data["last_updated"] = datetime.utcnow().isoformat()
+    
+    setting.setting_value = config_data
+    setting.updated_at = datetime.utcnow().isoformat()
+    db.commit()
+    db.refresh(setting)
+    
+    return setting
+
+def generate_ci_number(db: Session, dept_code: str = None, cat_code: str = None, commit: bool = True) -> str:
+    """
+    Generate next CI number based on config
+    Example: UTIV-EN-R-26-0000-00-001
+    
+    Args:
+        db: Database session
+        dept_code: Override department code (e.g., "EN", "WB")
+        cat_code: Override category code (e.g., "R", "Q")
+        commit: If True, commit counter increment to DB. If False, just generate without persisting.
+    
+    Returns:
+        Generated CI number string
+    """
+    setting = get_or_create_ci_numbering_config(db)
+    config = setting.setting_value.copy() if isinstance(setting.setting_value, dict) else {}
+    
+    # Build CI number from enabled parts
+    parts_list = []
+    parts = config.get("parts", DEFAULT_CI_NUMBERING_CONFIG["parts"])
+    
+    for part in parts:
+        if not part.get("enabled", False):
+            continue
+        
+        part_name = part.get("name")
+        part_value = part.get("value", "")
+        is_auto = part.get("auto_increment", False)
+        
+        # Override with function parameters if provided
+        if part_name == "department" and dept_code:
+            part_value = dept_code
+        elif part_name == "category" and cat_code:
+            part_value = cat_code
+        elif part_name == "counter" and is_auto:
+            # Use next_counter and pad with zeros
+            counter = config.get("next_counter", 1)
+            # Determine padding from part value length (e.g., "000" = pad to 3)
+            pad_length = len(part_value) if isinstance(part_value, str) else 3
+            part_value = str(counter).zfill(pad_length)
+            
+            # Increment counter for next time (and save if commit=True)
+            if commit:
+                config["next_counter"] = counter + 1
+                setting.setting_value = config
+                setting.updated_at = datetime.utcnow().isoformat()
+                db.add(setting)
+                db.commit()
+                db.refresh(setting)
+        elif part_name == "year":
+            # Use current year's last 2 digits
+            if part_value == "00":  # If config says "00", use actual year
+                part_value = str(datetime.utcnow().year)[-2:]
+            # Otherwise use config value
+        
+        parts_list.append(str(part_value))
+    
+    separator = config.get("separator", "-")
+    ci_number = separator.join(parts_list)
+    
+    return ci_number
+
+def get_ci_numbering_format(db: Session) -> dict:
+    """Get current CI numbering format for frontend display"""
+    setting = get_or_create_ci_numbering_config(db)
+    config = setting.setting_value
+    
+    return {
+        "parts": config.get("parts", DEFAULT_CI_NUMBERING_CONFIG["parts"]),
+        "separator": config.get("separator", "-"),
+        "next_counter": config.get("next_counter", 1),
+        "example": generate_ci_number(db, commit=False)  # Preview without incrementing
+    }

@@ -7,6 +7,7 @@ from app.models.user import User
 from app.schemas.ci_project import CIProjectCreate, CIProjectUpdate, CIProjectResponse
 from app.core.rbac import get_current_user, require_roles
 from app.services.audit_logger import log_audit_event
+from app.services.ci_numbering_service import generate_ci_number
 from datetime import datetime
 
 router = APIRouter(prefix="/api/projects", tags=["CI Projects"])
@@ -64,11 +65,9 @@ def create_project(
     """
     Create project - only Administrator, TPM Manager, Engineer
     """
-    # Auto-generate CI No if not provided
+    # Auto-generate CI No using new config-based system
     if not project_in.ci_no:
-        count = db.query(CIProject).count() + 1
-        year_short = datetime.now().strftime("%y")
-        project_in.ci_no = f"CI-{year_short}-{count:03d}"
+        project_in.ci_no = generate_ci_number(db)
 
     # Calculate achievement rate if metrics present
     ach_rate = project_in.achievement_rate
