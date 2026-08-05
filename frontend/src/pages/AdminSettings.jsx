@@ -334,9 +334,65 @@ export default function AdminSettings() {
         </Tabs>
       </Box>
 
+      {/* App Mode Tab */}
+      {isAdmin && (
+        <TabPanel value={tabValue} index={0}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={8}>
+              <Card sx={{ borderLeft: '4px solid #8b5cf6' }}>
+                <CardContent sx={{ backgroundColor: isDark ? 'rgba(139, 92, 246, 0.1)' : 'rgba(139, 92, 246, 0.05)' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: isDark ? '#a78bfa' : '#6d28d9' }}>Application Mode</Typography>
+                  <Box sx={{ mb: 3, p: 2, backgroundColor: isDark ? '#1e293b' : '#f8fafc', border: `2px solid ${appMode === 'demo' ? '#8b5cf6' : '#059669'}`, borderRadius: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box>
+                        <Typography variant="h5" sx={{ fontWeight: 800, color: appMode === 'demo' ? '#8b5cf6' : '#059669' }}>{appMode.toUpperCase()} MODE</Typography>
+                        <Typography variant="body2" sx={{ color: isDark ? '#94a3b8' : '#64748b', mt: 0.5 }}>{appMode === 'demo' ? 'Sample data loaded - Perfect for testing and demonstrations' : 'Production mode - Clean slate with no sample data'}</Typography>
+                      </Box>
+                      <Button variant="contained" color={appMode === 'demo' ? 'warning' : 'success'} onClick={handleToggleMode} disabled={togglingMode} sx={{ minWidth: '160px' }}>{togglingMode ? 'Switching...' : `Switch to ${appMode === 'demo' ? 'PRODUCTION' : 'DEMO'}`}</Button>
+                    </Box>
+                  </Box>
+                  <Box sx={{ p: 2, backgroundColor: isDark ? '#0f172a' : '#f0fdf4', border: `1px solid ${isDark ? '#334155' : '#dcfce7'}`, borderRadius: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: isDark ? '#a7f3d0' : '#065f46' }}>📋 Mode Details:</Typography>
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: isDark ? '#86efac' : '#16a34a', mb: 1 }}>✓ DEMO Mode</Typography>
+                      <Box component="ul" sx={{ m: 0, pl: 2, color: isDark ? '#6ee7b7' : '#047857' }}>
+                        <li><Typography variant="caption" sx={{ color: 'inherit' }}>Includes 8 sample CI projects (2024-2026)</Typography></li>
+                        <li><Typography variant="caption" sx={{ color: 'inherit' }}>Mix of Complete, Running, and Pending statuses</Typography></li>
+                        <li><Typography variant="caption" sx={{ color: 'inherit' }}>All dashboard KPIs auto-calculated from sample data</Typography></li>
+                      </Box>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: isDark ? '#60a5fa' : '#1e40af', mb: 1 }}>✓ PRODUCTION Mode</Typography>
+                      <Box component="ul" sx={{ m: 0, pl: 2, color: isDark ? '#60a5fa' : '#1e3a8a' }}>
+                        <li><Typography variant="caption" sx={{ color: 'inherit' }}>All existing data cleared</Typography></li>
+                        <li><Typography variant="caption" sx={{ color: 'inherit' }}>Start with clean slate</Typography></li>
+                        <li><Typography variant="caption" sx={{ color: 'inherit' }}>Data only created when users add CI projects</Typography></li>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Alert severity="warning" sx={{ mt: 3 }}><strong>⚠️ Important:</strong> Switching modes will reload the page for all users. When switching to PRODUCTION, all existing data will be deleted!</Alert>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card sx={{ borderLeft: '4px solid #3b82f6', backgroundColor: isDark ? '#1e293b' : '#eff6ff' }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: isDark ? '#93c5fd' : '#1e40af' }}>💡 Recommendations</Typography>
+                  <Box component="ul" sx={{ m: 0, pl: 2, color: isDark ? '#cbd5e1' : '#1e3a8a' }}>
+                    <li><Typography variant="caption" sx={{ color: 'inherit', display: 'block', mb: 1 }}>Use DEMO for feature testing</Typography></li>
+                    <li><Typography variant="caption" sx={{ color: 'inherit', display: 'block', mb: 1 }}>Use DEMO for team training</Typography></li>
+                    <li><Typography variant="caption" sx={{ color: 'inherit', display: 'block', mb: 1 }}>Switch to PRODUCTION before live use</Typography></li>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </TabPanel>
+      )}
+
       {/* CI Numbering Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={1}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={7}>
               <Card>
@@ -518,7 +574,7 @@ export default function AdminSettings() {
 
       {/* User Management Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -582,7 +638,7 @@ export default function AdminSettings() {
 
       {/* Role Management Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={4}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
