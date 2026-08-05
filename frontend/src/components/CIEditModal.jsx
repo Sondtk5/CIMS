@@ -129,10 +129,11 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
                   value={formData.ci_no || ''} 
                   onChange={(e) => handleChange('ci_no', e.target.value)}
                   disabled={formData.id ? true : false} 
-                  placeholder="Auto-filled or enter manually"
+                  placeholder={formData.id ? "CI No. (locked after creation)" : "Auto-filled or enter manually"}
                   sx={{ flex: 1 }}
                 />
-                {!formData.id && (
+                {/* Always show Auto button for both new and edit mode */}
+                {(
                   <Button 
                     variant="outlined" 
                     size="small" 
