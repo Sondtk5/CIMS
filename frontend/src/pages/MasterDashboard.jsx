@@ -67,7 +67,12 @@ export default function MasterDashboard() {
 
   useEffect(() => {
     loadDashboard();
-  }, [selectedYear]);
+  }, [selectedYear, isDark]);
+
+  // Force chart re-render when theme changes (ECharts doesn't auto-detect)
+  useEffect(() => {
+    // This triggers re-render of all options with new isDark value
+  }, [isDark]);
 
   const handleOpenEdit = (project) => {
     setSelectedProject(project);

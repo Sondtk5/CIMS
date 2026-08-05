@@ -57,7 +57,14 @@ def update_ci_numbering_config(db: Session, config_data: dict):
 
 def generate_ci_number(db: Session, dept_code: str = None, cat_code: str = None, commit: bool = True) -> str:
     """
-    Generate next CI number based on config
+    Generate next CI number based on config and existing CI projects.
+    
+    Strategy:
+    1. Query all existing CI projects
+    2. Extract counter from last CI no
+    3. Auto-increment from there
+    4. If no projects exist, use next_counter from config
+    
     Example: UTIV-EN-R-26-0000-00-001
     
     Args:
@@ -69,12 +76,42 @@ def generate_ci_number(db: Session, dept_code: str = None, cat_code: str = None,
     Returns:
         Generated CI number string
     """
+    from app.models.ci_project import CIProject
+    
     setting = get_or_create_ci_numbering_config(db)
     config = setting.setting_value.copy() if isinstance(setting.setting_value, dict) else {}
+    parts = config.get("parts", DEFAULT_CI_NUMBERING_CONFIG["parts"])
+    separator = config.get("separator", "-")
+    
+    # Find the counter part to determine padding
+    counter_part = next((p for p in parts if p.get("name") == "counter"), None)
+    pad_length = len(counter_part.get("value", "000")) if counter_part else 3
+    
+    # Query existing CI projects and find max counter
+    all_projects = db.query(CIProject).all()
+    max_counter = 0
+    
+    if all_projects:
+        for project in all_projects:
+            try:
+                if project.ci_no:
+                    # Split by separator and get last part (counter)
+                    ci_parts = project.ci_no.split(separator)
+                    if ci_parts:
+                        counter_str = ci_parts[-1]
+                        # Extract number from counter (in case it has letters)
+                        counter_num = int(''.join(filter(str.isdigit, counter_str)) or '0')
+                        if counter_num > max_counter:
+                            max_counter = counter_num
+            except Exception as e:
+                print(f"Error parsing CI number {project.ci_no}: {e}")
+                continue
+    
+    # Use max_counter + 1 (or next_counter if config is higher)
+    next_counter = max(max_counter + 1, config.get("next_counter", 1))
     
     # Build CI number from enabled parts
     parts_list = []
-    parts = config.get("parts", DEFAULT_CI_NUMBERING_CONFIG["parts"])
     
     for part in parts:
         if not part.get("enabled", False):
@@ -91,14 +128,11 @@ def generate_ci_number(db: Session, dept_code: str = None, cat_code: str = None,
             part_value = cat_code
         elif part_name == "counter" and is_auto:
             # Use next_counter and pad with zeros
-            counter = config.get("next_counter", 1)
-            # Determine padding from part value length (e.g., "000" = pad to 3)
-            pad_length = len(part_value) if isinstance(part_value, str) else 3
-            part_value = str(counter).zfill(pad_length)
+            part_value = str(next_counter).zfill(pad_length)
             
             # Increment counter for next time (and save if commit=True)
             if commit:
-                config["next_counter"] = counter + 1
+                config["next_counter"] = next_counter + 1
                 setting.setting_value = config
                 setting.updated_at = datetime.utcnow().isoformat()
                 db.add(setting)
@@ -112,7 +146,6 @@ def generate_ci_number(db: Session, dept_code: str = None, cat_code: str = None,
         
         parts_list.append(str(part_value))
     
-    separator = config.get("separator", "-")
     ci_number = separator.join(parts_list)
     
     return ci_number
