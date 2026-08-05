@@ -24,7 +24,7 @@ export default function AdminSettings() {
     }
 
     loadCI();
-  }, [isAdmin]);
+  }, [isAdmin, user]);
 
   const loadCI = async () => {
     setLoading(true);
