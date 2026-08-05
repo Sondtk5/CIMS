@@ -29,6 +29,7 @@ export const dashboardAPI = {
     const params = year ? { year } : {};
     return api.get('/dashboard', { params });
   },
+  getAvailableYears: () => api.get('/dashboard/available-years'),
 };
 
 export const projectsAPI = {

@@ -1,4 +1,19 @@
-import React, { useState, useEffect } from 'react';
+  // Load available years on component mount
+  useEffect(() => {
+    const loadYears = async () => {
+      try {
+        const res = await dashboardAPI.getAvailableYears();
+        setAvailableYears(res.data.years || [new Date().getFullYear()]);
+        // Set to first available year if current isn't available
+        if (res.data.years && !res.data.years.includes(selectedYear)) {
+          setSelectedYear(res.data.years[0]);
+        }
+      } catch (err) {
+        console.warn('Failed to load available years', err);
+      }
+    };
+    loadYears();
+  }, []);import React, { useState, useEffect } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, Table, TableHead, TableRow, TableCell,
   TableBody, Chip, Button, IconButton, TextField, MenuItem, CircularProgress, Alert
@@ -28,6 +43,7 @@ export default function MasterDashboard() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState([new Date().getFullYear()]);
 
   const loadDashboard = async () => {
     setLoading(true);
@@ -305,14 +321,14 @@ export default function MasterDashboard() {
                 select
                 size="small"
                 value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                 sx={{
                   width: '80px',
                   '& .MuiOutlinedInput-root': { backgroundColor: '#fff', height: '28px' },
                   '& .MuiOutlinedInput-input': { fontSize: '0.75rem', p: '4px 8px' }
                 }}
               >
-                {[2024, 2025, 2026].map((y) => (
+                {availableYears.map((y) => (
                   <MenuItem key={y} value={y}>{y}</MenuItem>
                 ))}
               </TextField>

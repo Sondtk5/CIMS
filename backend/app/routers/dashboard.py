@@ -55,3 +55,40 @@ def save_month_snapshot(
     
     result = save_current_month_snapshot(db)
     return result
+
+
+@router.get("/available-years")
+def get_available_years(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get list of available years from CI projects (based on start_date).
+    Returns sorted list of unique years from all CI projects.
+    """
+    from sqlalchemy import func
+    from app.models.ci_project import CIProject
+    
+    # Get unique years from CI projects start_date
+    years_result = db.query(
+        func.cast(
+            func.substr(CIProject.start_date, 1, 4),
+            db.Integer
+        ).distinct()
+    ).filter(
+        CIProject.start_date.isnot(None)
+    ).all()
+    
+    # Flatten and sort years
+    years = sorted([year[0] for year in years_result if year[0]], reverse=True)
+    
+    # If no years found, return current year
+    if not years:
+        years = [datetime.now().year]
+    
+    # Add current year if not already in list
+    current_year = datetime.now().year
+    if current_year not in years:
+        years.insert(0, current_year)
+    
+    return {"years": years, "current_year": current_year}
