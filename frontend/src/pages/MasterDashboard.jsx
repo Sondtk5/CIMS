@@ -52,8 +52,9 @@ export default function MasterDashboard() {
   const loadDashboard = async () => {
     setLoading(true);
     try {
+      const yearParam = selectedYear === 'all' ? null : selectedYear;
       const [resSummary, resProjects] = await Promise.all([
-        dashboardAPI.getSummary(selectedYear),
+        dashboardAPI.getSummary(yearParam),
         projectsAPI.getAll()
       ]);
       setData(resSummary.data);
@@ -339,6 +340,7 @@ export default function MasterDashboard() {
                   '& .MuiOutlinedInput-input': { fontSize: '0.75rem', p: '4px 8px' }
                 }}
               >
+                <MenuItem value="all">All Years</MenuItem>
                 {availableYears.map((y) => (
                   <MenuItem key={y} value={y}>{y}</MenuItem>
                 ))}
