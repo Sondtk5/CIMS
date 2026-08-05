@@ -18,12 +18,13 @@ function TabPanel(props) {
 
 export default function AdminSettings() {
   const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const { user } = useAuth();
   const isAdmin = user?.role === 'Administrator';
 
   // Common
   const [msg, setMsg] = useState({ open: false, text: '', type: 'success' });
-  const [tabValue, setTabValue] = useState(isAdmin ? 0 : 4); // Default to Change Password if not admin
+  const [tabValue, setTabValue] = useState(isAdmin ? 0 : 4);
   const [loading, setLoading] = useState(true);
 
   // KPI Targets
@@ -73,7 +74,6 @@ export default function AdminSettings() {
         setUsers(resUsers.data);
         setRoles(resRoles.data);
         
-        // Load CI Numbering config
         try {
           const resCI = await settingsAPI.getCINumberingConfig();
           setCIParts(resCI.data.parts || []);
@@ -282,8 +282,8 @@ export default function AdminSettings() {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
         <SettingsIcon color="primary" sx={{ fontSize: 32 }} />
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800 }}>Admin System Settings</Typography>
-          <Typography variant="body2" sx={{ color: theme.palette.mode === 'dark' ? '#94a3b8' : '#64748b' }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: isDark ? '#f1f5f9' : '#1e293b' }}>Admin System Settings</Typography>
+          <Typography variant="body2" sx={{ color: isDark ? '#94a3b8' : '#475569' }}>
             {isAdmin ? 'Configure system settings, KPI targets, users and roles' : 'Change your password'}
           </Typography>
         </Box>
@@ -305,14 +305,15 @@ export default function AdminSettings() {
         <TabPanel value={tabValue} index={0}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={7}>
-              <Card sx={{ borderLeft: '4px solid #2563eb' }}>
+              <Card>
                 <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>CI Project Numbering Configuration</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: isDark ? '#f1f5f9' : '#1e293b' }}>CI Project Numbering Configuration</Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
                     {ciParts.map((part, idx) => (
                       <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1.5, 
-                        backgroundColor: theme.palette.mode === 'dark' ? '#334155' : '#f8fafc', 
-                        borderRadius: 1 
+                        backgroundColor: isDark ? '#334155' : '#e2e8f0', 
+                        borderRadius: 1,
+                        border: `1px solid ${isDark ? '#475569' : '#cbd5e1'}`
                       }}>
                         <FormControlLabel
                           control={
@@ -322,7 +323,7 @@ export default function AdminSettings() {
                               size="small"
                             />
                           }
-                          label={<Typography sx={{ fontWeight: 600, minWidth: '100px' }}>{part.name}</Typography>}
+                          label={<Typography sx={{ fontWeight: 600, minWidth: '100px', color: isDark ? '#f1f5f9' : '#1e293b' }}>{part.name}</Typography>}
                           sx={{ m: 0, flex: 0 }}
                         />
                         <TextField
@@ -332,11 +333,12 @@ export default function AdminSettings() {
                           onChange={(e) => handleCIPartValueChange(idx, e.target.value)}
                           disabled={!part.enabled}
                           sx={{ minWidth: '100px' }}
+                          InputLabelProps={{ sx: { color: isDark ? '#94a3b8' : '#64748b' } }}
                         />
                         {part.auto_increment && (
                           <Typography variant="caption" sx={{ 
-                            color: theme.palette.mode === 'dark' ? '#06b6d4' : '#0891b2', 
-                            backgroundColor: theme.palette.mode === 'dark' ? '#164e63' : '#cffafe', 
+                            color: isDark ? '#06b6d4' : '#0891b2', 
+                            backgroundColor: isDark ? '#164e63' : '#cffafe', 
                             px: 1, py: 0.5, borderRadius: 0.5, fontWeight: 600 
                           }}>
                             AUTO-INCREMENT
@@ -346,7 +348,7 @@ export default function AdminSettings() {
                     ))}
                   </Box>
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Separator</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: isDark ? '#f1f5f9' : '#1e293b' }}>Separator</Typography>
                     <TextField
                       label="Separator"
                       size="small"
@@ -370,31 +372,33 @@ export default function AdminSettings() {
             </Grid>
             <Grid item xs={12} md={5}>
               <Card sx={{ 
-                borderLeft: '4px solid #059669',
-                backgroundColor: theme.palette.mode === 'dark' ? '#164e3f' : '#f0fdf4'
+                borderLeft: '4px solid #059669'
               }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>Preview</Typography>
+                <CardContent sx={{
+                  backgroundColor: isDark ? '#164e3f' : '#ecfdf5'
+                }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 3, color: isDark ? '#a7f3d0' : '#065f46' }}>Preview</Typography>
                   <Box sx={{ mb: 3, p: 2, 
-                    backgroundColor: theme.palette.mode === 'dark' ? '#1e293b' : '#fff',
-                    border: '2px dashed #059669', 
-                    borderRadius: 1 
+                    backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                    border: `2px dashed #059669`,
+                    borderRadius: 1,
+                    color: isDark ? '#f1f5f9' : '#1e293b'
                   }}>
-                    <Typography variant="caption" sx={{ color: theme.palette.mode === 'dark' ? '#cbd5e1' : '#64748b' }}>Next CI Number:</Typography>
+                    <Typography variant="caption" sx={{ color: isDark ? '#cbd5e1' : '#475569' }}>Next CI Number:</Typography>
                     <Typography variant="h5" sx={{ fontWeight: 800, fontFamily: 'monospace', color: '#059669', mt: 1 }}>
                       {ciExample}
                     </Typography>
                   </Box>
                   <Box sx={{ p: 2, 
-                    backgroundColor: theme.palette.mode === 'dark' ? '#164e3f' : '#f0fdf4', 
-                    border: '1px solid #dcfce7', 
+                    backgroundColor: isDark ? '#1e293b' : '#f0fdf4', 
+                    border: `1px solid ${isDark ? '#334155' : '#dcfce7'}`, 
                     borderRadius: 1 
                   }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: theme.palette.mode === 'dark' ? '#a7f3d0' : '#065f46' }}>Format Guide:</Typography>
-                    <Box component="ul" sx={{ m: 0, pl: 2, color: theme.palette.mode === 'dark' ? '#6ee7b7' : '#047857' }}>
-                      <li><Typography variant="caption">Enabled parts: Will appear in CI number</Typography></li>
-                      <li><Typography variant="caption">Toggle: Turn parts ON/OFF to customize</Typography></li>
-                      <li><Typography variant="caption">Auto-increment: Counter increases with each project</Typography></li>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: isDark ? '#a7f3d0' : '#065f46' }}>Format Guide:</Typography>
+                    <Box component="ul" sx={{ m: 0, pl: 2, color: isDark ? '#6ee7b7' : '#047857' }}>
+                      <li><Typography variant="caption" sx={{ color: 'inherit' }}>Enabled parts: Will appear in CI number</Typography></li>
+                      <li><Typography variant="caption" sx={{ color: 'inherit' }}>Toggle: Turn parts ON/OFF to customize</Typography></li>
+                      <li><Typography variant="caption" sx={{ color: 'inherit' }}>Auto-increment: Counter increases with each project</Typography></li>
                     </Box>
                   </Box>
                 </CardContent>
@@ -407,62 +411,72 @@ export default function AdminSettings() {
       {/* KPI Targets Tab */}
       {isAdmin && (
         <TabPanel value={tabValue} index={1}>
-          <Card sx={{ borderLeft: '4px solid #1565C0' }}>
+          <Card>
             <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>KPI Target Configuration</Typography>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9' }}>
-                    <TableCell sx={{ fontWeight: 'bold' }}>KPI Metric Name</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Operator</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Target Threshold Value</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Unit</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {targets.map((t) => (
-                    <TableRow key={t.kpi_key} hover>
-                      <TableCell sx={{ fontWeight: 600 }}>{t.kpi_name}</TableCell>
-                      <TableCell sx={{ width: '120px' }}>
-                        <TextField
-                          select
-                          size="small"
-                          fullWidth
-                          value={t.comparison_operator || '>='}
-                          onChange={(e) => handleOperatorChange(t.kpi_key, e.target.value)}
-                        >
-                          <MenuItem value=">=">≥</MenuItem>
-                          <MenuItem value="<=">≤</MenuItem>
-                          <MenuItem value="=">=</MenuItem>
-                        </TextField>
-                      </TableCell>
-                      <TableCell sx={{ width: '180px' }}>
-                        <TextField
-                          type="number"
-                          size="small"
-                          fullWidth
-                          value={t.target_value}
-                          onChange={(e) => handleValueChange(t.kpi_key, e.target.value)}
-                        />
-                      </TableCell>
-                      <TableCell>{t.unit}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          startIcon={<SaveIcon />}
-                          onClick={() => handleSaveKPI(t)}
-                          disabled={savingKey === t.kpi_key}
-                        >
-                          {savingKey === t.kpi_key ? 'Saving...' : 'Save'}
-                        </Button>
-                      </TableCell>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: isDark ? '#f1f5f9' : '#1e293b' }}>KPI Target Configuration</Typography>
+              <Box sx={{ overflowX: 'auto' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ 
+                      backgroundColor: isDark ? '#334155' : '#e2e8f0',
+                      '& th': { fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }
+                    }}>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>KPI Metric Name</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Operator</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Target Threshold Value</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Unit</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Action</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {targets.map((t) => (
+                      <TableRow key={t.kpi_key} hover sx={{
+                        backgroundColor: isDark ? 'transparent' : '#ffffff',
+                        '&:hover': {
+                          backgroundColor: isDark ? '#334155' : '#f8fafc'
+                        }
+                      }}>
+                        <TableCell sx={{ fontWeight: 600, color: isDark ? '#f1f5f9' : '#1e293b' }}>{t.kpi_name}</TableCell>
+                        <TableCell sx={{ width: '120px' }}>
+                          <TextField
+                            select
+                            size="small"
+                            fullWidth
+                            value={t.comparison_operator || '>='}
+                            onChange={(e) => handleOperatorChange(t.kpi_key, e.target.value)}
+                          >
+                            <MenuItem value=">=">≥</MenuItem>
+                            <MenuItem value="<=">≤</MenuItem>
+                            <MenuItem value="=">=</MenuItem>
+                          </TextField>
+                        </TableCell>
+                        <TableCell sx={{ width: '180px' }}>
+                          <TextField
+                            type="number"
+                            size="small"
+                            fullWidth
+                            value={t.target_value}
+                            onChange={(e) => handleValueChange(t.kpi_key, e.target.value)}
+                          />
+                        </TableCell>
+                        <TableCell sx={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>{t.unit}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            startIcon={<SaveIcon />}
+                            onClick={() => handleSaveKPI(t)}
+                            disabled={savingKey === t.kpi_key}
+                          >
+                            {savingKey === t.kpi_key ? 'Saving...' : 'Save'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
             </CardContent>
           </Card>
         </TabPanel>
@@ -471,52 +485,62 @@ export default function AdminSettings() {
       {/* User Management Tab */}
       {isAdmin && (
         <TabPanel value={tabValue} index={2}>
-          <Card sx={{ borderLeft: '4px solid #2E7D32' }}>
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>User Management</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>User Management</Typography>
                 <Button variant="contained" color="primary" size="small" startIcon={<AddIcon />} onClick={() => openUserDialog()}>
                   Add User
                 </Button>
               </Box>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9' }}>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Username</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Full Name</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Role</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {users.map((u) => (
-                    <TableRow key={u.id} hover>
-                      <TableCell sx={{ fontWeight: 600 }}>{u.username}</TableCell>
-                      <TableCell>{u.email}</TableCell>
-                      <TableCell>{u.full_name}</TableCell>
-                      <TableCell>{u.role}</TableCell>
-                      <TableCell>
-                        <Typography variant="caption" sx={{ color: u.is_active ? '#2E7D32' : '#dc2626', fontWeight: 'bold' }}>
-                          {u.is_active ? 'Active' : 'Inactive'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <IconButton size="small" onClick={() => openUserDialog(u)} title="Edit">
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small" onClick={() => handleResetUserPassword(u)} title="Reset Password" color="warning">
-                          <LockIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small" onClick={() => handleDeleteUser(u.id)} title="Delete" color="error">
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </TableCell>
+              <Box sx={{ overflowX: 'auto' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ 
+                      backgroundColor: isDark ? '#334155' : '#e2e8f0',
+                      '& th': { fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }
+                    }}>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Username</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Email</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Full Name</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Role</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Actions</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {users.map((u) => (
+                      <TableRow key={u.id} hover sx={{
+                        backgroundColor: isDark ? 'transparent' : '#ffffff',
+                        '&:hover': {
+                          backgroundColor: isDark ? '#334155' : '#f8fafc'
+                        }
+                      }}>
+                        <TableCell sx={{ fontWeight: 600, color: isDark ? '#f1f5f9' : '#1e293b' }}>{u.username}</TableCell>
+                        <TableCell sx={{ color: isDark ? '#cbd5e1' : '#475569' }}>{u.email}</TableCell>
+                        <TableCell sx={{ color: isDark ? '#cbd5e1' : '#475569' }}>{u.full_name}</TableCell>
+                        <TableCell sx={{ color: isDark ? '#cbd5e1' : '#475569' }}>{u.role}</TableCell>
+                        <TableCell>
+                          <Typography variant="caption" sx={{ color: u.is_active ? '#2E7D32' : '#dc2626', fontWeight: 'bold' }}>
+                            {u.is_active ? 'Active' : 'Inactive'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <IconButton size="small" onClick={() => openUserDialog(u)} title="Edit">
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => handleResetUserPassword(u)} title="Reset Password" color="warning">
+                            <LockIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => handleDeleteUser(u.id)} title="Delete" color="error">
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
             </CardContent>
           </Card>
         </TabPanel>
@@ -525,43 +549,53 @@ export default function AdminSettings() {
       {/* Role Management Tab */}
       {isAdmin && (
         <TabPanel value={tabValue} index={3}>
-          <Card sx={{ borderLeft: '4px solid #DC2626' }}>
+          <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>Role Management</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>Role Management</Typography>
                 <Button variant="contained" color="primary" size="small" startIcon={<AddIcon />} onClick={() => openRoleDialog()}>
                   Add Role
                 </Button>
               </Box>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9' }}>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Role Name</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Description</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Created At</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {roles.map((r) => (
-                    <TableRow key={r.id} hover>
-                      <TableCell sx={{ fontWeight: 600 }}>{r.name}</TableCell>
-                      <TableCell>{r.description}</TableCell>
-                      <TableCell sx={{ fontSize: '0.85rem', color: theme.palette.mode === 'dark' ? '#94a3b8' : '#64748b' }}>
-                        {new Date(r.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <IconButton size="small" onClick={() => openRoleDialog(r)} title="Edit">
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small" onClick={() => handleDeleteRole(r)} title="Delete" color="error">
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </TableCell>
+              <Box sx={{ overflowX: 'auto' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ 
+                      backgroundColor: isDark ? '#334155' : '#e2e8f0',
+                      '& th': { fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }
+                    }}>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Role Name</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Description</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Created At</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#1e293b' }}>Actions</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {roles.map((r) => (
+                      <TableRow key={r.id} hover sx={{
+                        backgroundColor: isDark ? 'transparent' : '#ffffff',
+                        '&:hover': {
+                          backgroundColor: isDark ? '#334155' : '#f8fafc'
+                        }
+                      }}>
+                        <TableCell sx={{ fontWeight: 600, color: isDark ? '#f1f5f9' : '#1e293b' }}>{r.name}</TableCell>
+                        <TableCell sx={{ color: isDark ? '#cbd5e1' : '#475569' }}>{r.description}</TableCell>
+                        <TableCell sx={{ fontSize: '0.85rem', color: isDark ? '#94a3b8' : '#64748b' }}>
+                          {new Date(r.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <IconButton size="small" onClick={() => openRoleDialog(r)} title="Edit">
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => handleDeleteRole(r)} title="Delete" color="error">
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
             </CardContent>
           </Card>
         </TabPanel>
@@ -569,11 +603,11 @@ export default function AdminSettings() {
 
       {/* Change Password Tab */}
       <TabPanel value={tabValue} index={isAdmin ? 4 : 0}>
-        <Card sx={{ borderLeft: '4px solid #8b5cf6' }}>
+        <Card>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
               <LockIcon sx={{ color: '#8b5cf6' }} />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>Change Your Password</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>Change Your Password</Typography>
             </Box>
             <Grid container spacing={2} sx={{ maxWidth: '500px' }}>
               <Grid item xs={12}>
@@ -624,7 +658,7 @@ export default function AdminSettings() {
 
       {/* User Dialog */}
       <Dialog open={userDialog} onClose={() => setUserDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{selectedUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+        <DialogTitle sx={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>{selectedUser ? 'Edit User' : 'Add New User'}</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <TextField
             label="Username"
@@ -694,7 +728,7 @@ export default function AdminSettings() {
 
       {/* Role Dialog */}
       <Dialog open={roleDialog} onClose={() => setRoleDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{selectedRole ? 'Edit Role' : 'Add New Role'}</DialogTitle>
+        <DialogTitle sx={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>{selectedRole ? 'Edit Role' : 'Add New Role'}</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <TextField
             label="Role Name"
