@@ -5,6 +5,7 @@ from app.models.role import Role
 from app.models.kpi_target import KPITarget
 from app.models.ci_project import CIProject
 from app.models.monthly_kpi_snapshot import MonthlyKPISnapshot
+from app.models.admin_setting import AdminSetting
 from app.core.security import get_password_hash
 from datetime import datetime
 
@@ -56,7 +57,31 @@ def seed_db():
                 db.add(u)
             db.commit()
 
-        # 3. Seed KPI Targets if empty
+        # 3. Seed Admin Settings (CI Numbering) if empty
+        if db.query(AdminSetting).count() == 0:
+            ci_config = {
+                "parts": [
+                    {"name": "prefix", "value": "UTIV", "enabled": True, "auto_increment": False},
+                    {"name": "department", "value": "EN", "enabled": True, "auto_increment": False},
+                    {"name": "category", "value": "R", "enabled": True, "auto_increment": False},
+                    {"name": "year", "value": "00", "enabled": True, "auto_increment": False},
+                    {"name": "sequence", "value": "0000", "enabled": True, "auto_increment": False},
+                    {"name": "version", "value": "00", "enabled": True, "auto_increment": False},
+                    {"name": "counter", "value": "000", "enabled": True, "auto_increment": True}
+                ],
+                "separator": "-",
+                "next_counter": 1,
+                "last_updated": datetime.utcnow().isoformat()
+            }
+            admin_setting = AdminSetting(
+                setting_key="ci_numbering_config",
+                setting_value=ci_config,
+                description="CI Project numbering convention configuration"
+            )
+            db.add(admin_setting)
+            db.commit()
+
+        # 4. Seed KPI Targets if empty
         if db.query(KPITarget).count() == 0:
             targets_data = [
                 ("on_time_completion", "Improvement Project On-time Completion Rate", 95.0, "%", ">="),
@@ -77,7 +102,7 @@ def seed_db():
                 db.add(t)
             db.commit()
 
-        # 4. Seed CI Projects if empty
+        # 5. Seed CI Projects if empty
         if db.query(CIProject).count() == 0:
             seed_projects = [
                 {
@@ -277,7 +302,7 @@ def seed_db():
 
             db.commit()
 
-        # 5. Seed Monthly KPI Snapshots for 2026 if empty
+        # 6. Seed Monthly KPI Snapshots for 2026 if empty
         if db.query(MonthlyKPISnapshot).count() == 0:
             snapshot_data = [
                 (2026, 1, 92.0, 88.0, 42.0, 45000.0, 1),
