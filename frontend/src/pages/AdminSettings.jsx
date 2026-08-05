@@ -24,7 +24,7 @@ export default function AdminSettings() {
 
   // Common
   const [msg, setMsg] = useState({ open: false, text: '', type: 'success' });
-  const [tabValue, setTabValue] = useState(isAdmin ? 0 : 4);
+  const [tabValue, setTabValue] = useState(isAdmin ? 0 : 5);
   const [loading, setLoading] = useState(true);
 
   // KPI Targets
@@ -336,7 +336,7 @@ export default function AdminSettings() {
 
       {/* CI Numbering Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={4}>
+        <TabPanel value={tabValue} index={2}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={7}>
               <Card>
@@ -444,7 +444,7 @@ export default function AdminSettings() {
 
       {/* KPI Targets Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={4}>
+        <TabPanel value={tabValue} index={2}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: isDark ? '#f1f5f9' : '#1e293b' }}>KPI Target Configuration</Typography>
@@ -518,7 +518,7 @@ export default function AdminSettings() {
 
       {/* User Management Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={4}>
+        <TabPanel value={tabValue} index={2}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -582,7 +582,7 @@ export default function AdminSettings() {
 
       {/* Role Management Tab */}
       {isAdmin && (
-        <TabPanel value={tabValue} index={4}>
+        <TabPanel value={tabValue} index={2}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
