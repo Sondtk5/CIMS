@@ -197,12 +197,12 @@ export default function CIReportPrintView({ project }) {
           <TableRow sx={{ height: '90px', verticalAlign: 'bottom' }}>
             <TableCell sx={{ verticalAlign: 'bottom' }}>{project.owner}</TableCell>
             <TableCell sx={{ verticalAlign: 'bottom' }}>{project.tpm_reviewed_by || ''}</TableCell>
-            <TableCell sx={{ verticalAlign: 'bottom' }}>{project.tpm_decision === 'Approved' ? (project.tpm_approved_by || '') : ''}</TableCell>
+            <TableCell sx={{ verticalAlign: 'bottom' }}>{project.tpm_decision === 'Approved' && project.tpm_approved_by ? project.tpm_approved_by : ''}</TableCell>
           </TableRow>
           <TableRow sx={{ height: '45px' }}>
             <TableCell>Date: {project.start_date}</TableCell>
             <TableCell>{project.tpm_review_date ? `Date: ${project.tpm_review_date}` : ''}</TableCell>
-            <TableCell>{project.tpm_decision === 'Approved' ? `Date: ${project.tpm_approve_date || project.close_date || project.due_date}` : ''}</TableCell>
+            <TableCell>{project.tpm_decision === 'Approved' && project.tpm_approve_date ? `Date: ${project.tpm_approve_date}` : ''}</TableCell>
           </TableRow>
         </TableBody>
       </Table>

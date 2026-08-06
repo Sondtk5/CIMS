@@ -45,6 +45,9 @@ class CIProjectBase(BaseModel):
     tpm_review_date: Optional[str] = None
     tpm_review_comment: Optional[str] = None
     tpm_decision: Optional[str] = "Pending"
+    tpm_approved_by: Optional[str] = None
+    tpm_approve_date: Optional[str] = None
+    tpm_approve_comment: Optional[str] = None
     
     define_stage: Optional[Dict[str, Any]] = None
     measure_stage: Optional[Dict[str, Any]] = None
@@ -97,6 +100,9 @@ class CIProjectUpdate(BaseModel):
     tpm_review_date: Optional[str] = None
     tpm_review_comment: Optional[str] = None
     tpm_decision: Optional[str] = None
+    tpm_approved_by: Optional[str] = None
+    tpm_approve_date: Optional[str] = None
+    tpm_approve_comment: Optional[str] = None
     
     define_stage: Optional[Dict[str, Any]] = None
     measure_stage: Optional[Dict[str, Any]] = None
