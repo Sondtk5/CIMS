@@ -9,9 +9,9 @@ DEFAULT_CI_NUMBERING_CONFIG = {
         {"name": "department", "value": "EN", "enabled": True, "auto_increment": False},
         {"name": "category", "value": "R", "enabled": True, "auto_increment": False},
         {"name": "year", "value": "00", "enabled": True, "auto_increment": False},
-        {"name": "sequence", "value": "0000", "enabled": True, "auto_increment": False},
-        {"name": "version", "value": "00", "enabled": True, "auto_increment": False},
-        {"name": "counter", "value": "000", "enabled": True, "auto_increment": True}  # Auto-increment by default
+        {"name": "sequence", "value": "0001", "enabled": True, "auto_increment": False},
+        {"name": "version", "value": "02", "enabled": True, "auto_increment": False},
+        {"name": "counter", "value": "001", "enabled": True, "auto_increment": True}  # Auto-increment by default
     ],
     "separator": "-",
     "next_counter": 1,
