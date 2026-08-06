@@ -187,7 +187,6 @@ export default function CIReportPrintView({ project }) {
       </Grid>
 
       {/* Approval Signatures */}
-      <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.5, textAlign: 'center' }}>Approval</Typography>
       <Table size="small" sx={{ '& td': { border: '1px solid #000', p: 0.5, textAlign: 'center', fontSize: '0.75rem' } }}>
         <TableBody>
           <TableRow sx={{ backgroundColor: '#f1f5f9' }}>
@@ -202,8 +201,8 @@ export default function CIReportPrintView({ project }) {
           </TableRow>
           <TableRow sx={{ height: '45px' }}>
             <TableCell>Date: {project.start_date}</TableCell>
-            <TableCell>Date: </TableCell>
-            <TableCell>Date: {project.status === 'Approved' ? (project.close_date || project.due_date) : ''}</TableCell>
+            <TableCell>{project.tpm_review_date ? `Date: ${project.tpm_review_date}` : ''}</TableCell>
+            <TableCell>{project.status === 'Approved' ? `Date: ${project.close_date || project.due_date}` : ''}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
