@@ -194,10 +194,10 @@ export default function CIReportPrintView({ project }) {
             <TableCell sx={{ fontWeight: 'bold', width: '33%' }}>Reviewed By (검토)</TableCell>
             <TableCell sx={{ fontWeight: 'bold', width: '34%' }}>Approved By (승인)</TableCell>
           </TableRow>
-          <TableRow sx={{ height: '90px' }}>
-            <TableCell>{project.owner}</TableCell>
-            <TableCell></TableCell>
-            <TableCell>{project.status === 'Approved' ? (project.verified_by || '') : ''}</TableCell>
+          <TableRow sx={{ height: '90px', verticalAlign: 'bottom' }}>
+            <TableCell sx={{ verticalAlign: 'bottom' }}>{project.owner}</TableCell>
+            <TableCell sx={{ verticalAlign: 'bottom' }}></TableCell>
+            <TableCell sx={{ verticalAlign: 'bottom' }}>{project.status === 'Approved' ? (project.verified_by || '') : ''}</TableCell>
           </TableRow>
           <TableRow sx={{ height: '45px' }}>
             <TableCell>Date: {project.start_date}</TableCell>
