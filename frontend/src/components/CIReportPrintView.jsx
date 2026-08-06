@@ -195,12 +195,12 @@ export default function CIReportPrintView({ project }) {
             <TableCell sx={{ fontWeight: 'bold', width: '33%' }}>Reviewed By (검토)</TableCell>
             <TableCell sx={{ fontWeight: 'bold', width: '34%' }}>Approved By (승인)</TableCell>
           </TableRow>
-          <TableRow sx={{ height: '45px' }}>
-            <TableCell>{project.owner}</TableCell>
-            <TableCell>{project.tpm_reviewed_by || 'TPM Manager'}</TableCell>
-            <TableCell>Plant Director</TableCell>
+          <TableRow sx={{ height: '90px' }}>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
+            <TableCell></TableCell>
           </TableRow>
-          <TableRow>
+          <TableRow sx={{ height: '45px' }}>
             <TableCell>Date: {project.start_date}</TableCell>
             <TableCell>Date: {project.start_date}</TableCell>
             <TableCell>Date: {project.close_date || project.due_date}</TableCell>

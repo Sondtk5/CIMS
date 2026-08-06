@@ -53,7 +53,7 @@ export default function CIRequestFormPrintView({ project }) {
             <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8fafc' }}>Position</TableCell>
             <TableCell>{project.position || 'Engineer'}</TableCell>
             <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8fafc' }}>Contact</TableCell>
-            <TableCell>{project.contact || 'Ext. 1234'}</TableCell>
+            <TableCell>{project.contact || ''}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
@@ -112,7 +112,7 @@ export default function CIRequestFormPrintView({ project }) {
         <TableBody>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold', width: '20%', backgroundColor: '#f8fafc' }}>Reviewed By</TableCell>
-            <TableCell sx={{ width: '30%' }}>{project.tpm_reviewed_by || 'TPM Manager'}</TableCell>
+            <TableCell sx={{ width: '30%' }}>{project.tpm_reviewed_by || ''}</TableCell>
             <TableCell sx={{ fontWeight: 'bold', width: '20%', backgroundColor: '#f8fafc' }}>Review Date</TableCell>
             <TableCell sx={{ width: '30%' }}>{project.tpm_review_date || project.start_date}</TableCell>
           </TableRow>
