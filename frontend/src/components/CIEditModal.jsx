@@ -13,11 +13,18 @@ import { projectsAPI, settingsAPI } from '../services/api';
 
 export default function CIEditModal({ open, onClose, project, onSaved, onDelete }) {
   const [activeTab, setActiveTab] = useState(0);
-  const [printMode, setPrintMode] = useState(null); // 'request' or 'report' or null
+  const [printMode, setPrintMode] = useState(null);
   const [formData, setFormData] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [generatingCI, setGeneratingCI] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
+
+  // List of required fields
+  const requiredFields = [
+    'title', 'department', 'category', 'priority', 'owner', 
+    'start_date', 'due_date', 'status', 'ci_no'
+  ];
 
   useEffect(() => {
     if (project) {
@@ -29,6 +36,7 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
         improve_stage: project.improve_stage || {},
         control_stage: project.control_stage || {},
       });
+      setValidationErrors({});
       // Auto-generate CI if it's a new project (no id)
       if (!project.id && !project.ci_no) {
         generateNewCI();
@@ -49,13 +57,91 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
     }
   };
 
+  const validateForm = () => {
+    const errors = {};
+
+    // Check required fields
+    if (!formData.title || formData.title.trim() === '') {
+      errors.title = 'Project Title is required';
+    }
+    if (!formData.department || formData.department.trim() === '') {
+      errors.department = 'Department is required';
+    }
+    if (!formData.owner || formData.owner.trim() === '') {
+      errors.owner = 'Owner / Project Leader is required';
+    }
+    if (!formData.category || formData.category.trim() === '') {
+      errors.category = 'Category is required';
+    }
+    if (!formData.priority || formData.priority.trim() === '') {
+      errors.priority = 'Priority is required';
+    }
+    if (!formData.start_date) {
+      errors.start_date = 'Start Date is required';
+    }
+    if (!formData.due_date) {
+      errors.due_date = 'Target Due Date is required';
+    }
+    if (!formData.status || formData.status.trim() === '') {
+      errors.status = 'Status is required';
+    }
+    if (!formData.ci_no || formData.ci_no.trim() === '') {
+      errors.ci_no = 'CI No. is required (auto-generate or enter)';
+    }
+
+    // Date validation
+    if (formData.start_date && formData.due_date) {
+      if (formData.start_date > formData.due_date) {
+        errors.due_date = 'Due Date must be after Start Date';
+      }
+    }
+
+    // Close date validation if provided
+    if (formData.close_date && formData.start_date) {
+      if (formData.close_date < formData.start_date) {
+        errors.close_date = 'Close Date must be after Start Date';
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const isFormValid = () => {
+    return (
+      formData.title?.trim() &&
+      formData.department?.trim() &&
+      formData.owner?.trim() &&
+      formData.category?.trim() &&
+      formData.priority?.trim() &&
+      formData.start_date &&
+      formData.due_date &&
+      formData.status?.trim() &&
+      formData.ci_no?.trim() &&
+      (!formData.start_date || !formData.due_date || formData.start_date <= formData.due_date)
+    );
+  };
+
   if (!project) return null;
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handleSave = async () => {
+    if (!validateForm()) {
+      setError('Please fill in all required fields correctly');
+      return;
+    }
+
     setSaving(true);
     setError('');
     try {
@@ -80,6 +166,26 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
       setPrintMode(null);
     }, 300);
   };
+
+  // Helper component to render required field label
+  const RequiredLabel = ({ label }) => (
+    <Box sx={{ display: 'flex', gap: 0.5 }}>
+      <span>{label}</span>
+      <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>*</span>
+    </Box>
+  );
+
+  // Helper component for field with error
+  const FieldWithError = ({ field, label, ...props }) => (
+    <Box>
+      <TextField
+        {...props}
+        label={label}
+        error={!!validationErrors[field]}
+        helperText={validationErrors[field] || ''}
+      />
+    </Box>
+  );
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -117,111 +223,258 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
       <DialogContent dividers sx={{ p: 3 }}>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-        {/* TAB 0: General & Request Form */}
         {activeTab === 0 && (
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-                <TextField 
-                  label="CI No." 
-                  fullWidth 
-                  size="small" 
-                  value={formData.ci_no || ''} 
-                  onChange={(e) => handleChange('ci_no', e.target.value)}
-                  disabled={formData.id ? true : false} 
-                  placeholder={formData.id ? "CI No. (locked after creation)" : "Auto-filled or enter manually"}
-                  sx={{ flex: 1 }}
-                />
-                {/* Always show Auto button for both new and edit mode */}
-                {(
-                  <Button 
-                    variant="outlined" 
-                    size="small" 
+          <Box>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Fields marked with <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>*</span> are required
+            </Alert>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+                  <FieldWithError
+                    field="ci_no"
+                    label={<RequiredLabel label="CI No." />}
+                    fullWidth
+                    size="small"
+                    value={formData.ci_no || ''}
+                    onChange={(e) => handleChange('ci_no', e.target.value)}
+                    disabled={formData.id ? true : false}
+                    placeholder={formData.id ? "CI No. (locked after creation)" : "Auto-filled or enter manually"}
+                    sx={{ flex: 1 }}
+                  />
+                  <Button
+                    variant="outlined"
+                    size="small"
                     startIcon={<RefreshIcon />}
                     onClick={generateNewCI}
-                    disabled={generatingCI}
+                    disabled={generatingCI || formData.id}
                     sx={{ mb: 0.75 }}
                     title="Refresh with latest auto-generated CI number from setting"
                   >
                     Auto
                   </Button>
-                )}
-              </Box>
+                </Box>
+              </Grid>
+              <Grid item xs={6}>
+                <FieldWithError
+                  field="title"
+                  label={<RequiredLabel label="Project Title" />}
+                  fullWidth
+                  size="small"
+                  value={formData.title || ''}
+                  onChange={(e) => handleChange('title', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FieldWithError
+                  field="department"
+                  label={<RequiredLabel label="Department" />}
+                  fullWidth
+                  size="small"
+                  value={formData.department || ''}
+                  onChange={(e) => handleChange('department', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Process / Area"
+                  fullWidth
+                  size="small"
+                  value={formData.process_area || ''}
+                  onChange={(e) => handleChange('process_area', e.target.value)}
+                  helperText="Optional"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FieldWithError
+                  field="category"
+                  label={<RequiredLabel label="Category" />}
+                  select
+                  fullWidth
+                  size="small"
+                  value={formData.category || 'Quality'}
+                  onChange={(e) => handleChange('category', e.target.value)}
+                >
+                  {['Quality', 'Productivity', 'Cost Saving', 'Equipment', 'Safety / Environment', 'Others'].map((cat) => (
+                    <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                  ))}
+                </FieldWithError>
+              </Grid>
+              <Grid item xs={6}>
+                <FieldWithError
+                  field="priority"
+                  label={<RequiredLabel label="Priority" />}
+                  select
+                  fullWidth
+                  size="small"
+                  value={formData.priority || 'Medium'}
+                  onChange={(e) => handleChange('priority', e.target.value)}
+                >
+                  <MenuItem value="High">High</MenuItem>
+                  <MenuItem value="Medium">Medium</MenuItem>
+                  <MenuItem value="Low">Low</MenuItem>
+                </FieldWithError>
+              </Grid>
+              <Grid item xs={6}>
+                <FieldWithError
+                  field="owner"
+                  label={<RequiredLabel label="Owner / Project Leader" />}
+                  fullWidth
+                  size="small"
+                  value={formData.owner || ''}
+                  onChange={(e) => handleChange('owner', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Requester"
+                  fullWidth
+                  size="small"
+                  value={formData.requester || ''}
+                  onChange={(e) => handleChange('requester', e.target.value)}
+                  helperText="Optional"
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <FieldWithError
+                  field="start_date"
+                  label={<RequiredLabel label="Start Date" />}
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  size="small"
+                  value={formData.start_date || ''}
+                  onChange={(e) => handleChange('start_date', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <FieldWithError
+                  field="due_date"
+                  label={<RequiredLabel label="Target Due Date" />}
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  size="small"
+                  value={formData.due_date || ''}
+                  onChange={(e) => handleChange('due_date', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <FieldWithError
+                  field="close_date"
+                  label="Close Date"
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  size="small"
+                  value={formData.close_date || ''}
+                  onChange={(e) => handleChange('close_date', e.target.value)}
+                  helperText="Optional"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FieldWithError
+                  field="status"
+                  label={<RequiredLabel label="Status" />}
+                  select
+                  fullWidth
+                  size="small"
+                  value={formData.status || 'Running'}
+                  onChange={(e) => handleChange('status', e.target.value)}
+                >
+                  <MenuItem value="Complete">Complete</MenuItem>
+                  <MenuItem value="Running">Running</MenuItem>
+                  <MenuItem value="Pending">Pending</MenuItem>
+                </FieldWithError>
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Progress (%)"
+                  type="number"
+                  fullWidth
+                  size="small"
+                  value={formData.progress ?? 0}
+                  onChange={(e) => handleChange('progress', parseInt(e.target.value))}
+                  helperText="Optional"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Issue Description"
+                  multiline
+                  rows={2}
+                  fullWidth
+                  size="small"
+                  value={formData.issue_description || ''}
+                  onChange={(e) => handleChange('issue_description', e.target.value)}
+                  helperText="Optional"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Current Status"
+                  multiline
+                  rows={2}
+                  fullWidth
+                  size="small"
+                  value={formData.current_status || ''}
+                  onChange={(e) => handleChange('current_status', e.target.value)}
+                  helperText="Optional"
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <TextField label="Project Title" fullWidth size="small" value={formData.title || ''} onChange={(e) => handleChange('title', e.target.value)} />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField label="Department" fullWidth size="small" value={formData.department || ''} onChange={(e) => handleChange('department', e.target.value)} />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField label="Process / Area" fullWidth size="small" value={formData.process_area || ''} onChange={(e) => handleChange('process_area', e.target.value)} />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField select label="Category" fullWidth size="small" value={formData.category || 'Quality'} onChange={(e) => handleChange('category', e.target.value)}>
-                {['Quality', 'Productivity', 'Cost Saving', 'Equipment', 'Safety / Environment', 'Others'].map((cat) => (
-                  <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid item xs={6}>
-              <TextField select label="Priority" fullWidth size="small" value={formData.priority || 'Medium'} onChange={(e) => handleChange('priority', e.target.value)}>
-                <MenuItem value="High">High</MenuItem>
-                <MenuItem value="Medium">Medium</MenuItem>
-                <MenuItem value="Low">Low</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={6}>
-              <TextField label="Owner / Project Leader" fullWidth size="small" value={formData.owner || ''} onChange={(e) => handleChange('owner', e.target.value)} />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField label="Requester" fullWidth size="small" value={formData.requester || ''} onChange={(e) => handleChange('requester', e.target.value)} />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField type="date" label="Start Date" InputLabelProps={{ shrink: true }} fullWidth size="small" value={formData.start_date || ''} onChange={(e) => handleChange('start_date', e.target.value)} />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField type="date" label="Target Due Date" InputLabelProps={{ shrink: true }} fullWidth size="small" value={formData.due_date || ''} onChange={(e) => handleChange('due_date', e.target.value)} />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField type="date" label="Close Date" InputLabelProps={{ shrink: true }} fullWidth size="small" value={formData.close_date || ''} onChange={(e) => handleChange('close_date', e.target.value)} />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField select label="Status" fullWidth size="small" value={formData.status || 'Running'} onChange={(e) => handleChange('status', e.target.value)}>
-                <MenuItem value="Complete">Complete</MenuItem>
-                <MenuItem value="Running">Running</MenuItem>
-                <MenuItem value="Pending">Pending</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={6}>
-              <TextField label="Progress (%)" type="number" fullWidth size="small" value={formData.progress ?? 0} onChange={(e) => handleChange('progress', parseInt(e.target.value))} />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Issue Description" multiline rows={2} fullWidth size="small" value={formData.issue_description || ''} onChange={(e) => handleChange('issue_description', e.target.value)} />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Current Status" multiline rows={2} fullWidth size="small" value={formData.current_status || ''} onChange={(e) => handleChange('current_status', e.target.value)} />
-            </Grid>
-          </Grid>
+          </Box>
         )}
 
         {/* TAB 1: DMAIC Project Report */}
         {activeTab === 1 && (
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#1565C0', mb: 1 }}>DMAIC Stage Summaries</Typography>
+              <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#1565C0', mb: 1 }}>DMAIC Stage Summaries (Optional)</Typography>
             </Grid>
             <Grid item xs={6}>
-              <TextField label="Define Stage Summary" multiline rows={2} fullWidth size="small" value={formData.define_stage?.summary || ''} onChange={(e) => handleChange('define_stage', { ...formData.define_stage, summary: e.target.value })} />
+              <TextField
+                label="Define Stage Summary"
+                multiline
+                rows={2}
+                fullWidth
+                size="small"
+                value={formData.define_stage?.summary || ''}
+                onChange={(e) => handleChange('define_stage', { ...formData.define_stage, summary: e.target.value })}
+              />
             </Grid>
             <Grid item xs={6}>
-              <TextField label="Measure Stage Summary" multiline rows={2} fullWidth size="small" value={formData.measure_stage?.summary || ''} onChange={(e) => handleChange('measure_stage', { ...formData.measure_stage, summary: e.target.value })} />
+              <TextField
+                label="Measure Stage Summary"
+                multiline
+                rows={2}
+                fullWidth
+                size="small"
+                value={formData.measure_stage?.summary || ''}
+                onChange={(e) => handleChange('measure_stage', { ...formData.measure_stage, summary: e.target.value })}
+              />
             </Grid>
             <Grid item xs={6}>
-              <TextField label="Improve Stage Summary" multiline rows={2} fullWidth size="small" value={formData.improve_stage?.summary || ''} onChange={(e) => handleChange('improve_stage', { ...formData.improve_stage, summary: e.target.value })} />
+              <TextField
+                label="Improve Stage Summary"
+                multiline
+                rows={2}
+                fullWidth
+                size="small"
+                value={formData.improve_stage?.summary || ''}
+                onChange={(e) => handleChange('improve_stage', { ...formData.improve_stage, summary: e.target.value })}
+              />
             </Grid>
             <Grid item xs={6}>
-              <TextField label="Control & Standardize Summary" multiline rows={2} fullWidth size="small" value={formData.control_stage?.summary || ''} onChange={(e) => handleChange('control_stage', { ...formData.control_stage, summary: e.target.value })} />
+              <TextField
+                label="Control & Standardize Summary"
+                multiline
+                rows={2}
+                fullWidth
+                size="small"
+                value={formData.control_stage?.summary || ''}
+                onChange={(e) => handleChange('control_stage', { ...formData.control_stage, summary: e.target.value })}
+              />
             </Grid>
           </Grid>
         )}
@@ -230,7 +483,7 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
         {activeTab === 2 && (
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#1565C0', mb: 2 }}>
-              5-Why Root Cause Analysis Tree
+              5-Why Root Cause Analysis Tree (Optional)
             </Typography>
             <Table size="small" sx={{ mb: 2 }}>
               <TableHead>
@@ -267,58 +520,142 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
 
         {/* TAB 3: Verification & Cost Saving */}
         {activeTab === 3 && (
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <TextField label="KPI Metric Name" fullWidth size="small" placeholder="Defect Rate (%), UPH, etc." value={formData.kpi_metric || ''} onChange={(e) => handleChange('kpi_metric', e.target.value)} />
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#1565C0', mb: 2 }}>Verification & Cost Saving (Optional)</Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  label="KPI Metric Name"
+                  fullWidth
+                  size="small"
+                  placeholder="Defect Rate (%), UPH, etc."
+                  value={formData.kpi_metric || ''}
+                  onChange={(e) => handleChange('kpi_metric', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  select
+                  label="QA Verification Result"
+                  fullWidth
+                  size="small"
+                  value={formData.result || '-'}
+                  onChange={(e) => handleChange('result', e.target.value)}
+                >
+                  <MenuItem value="PASS">PASS</MenuItem>
+                  <MenuItem value="FAIL">FAIL</MenuItem>
+                  <MenuItem value="-">-</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  type="number"
+                  label="Before Value"
+                  fullWidth
+                  size="small"
+                  value={formData.before_value ?? ''}
+                  onChange={(e) => handleChange('before_value', parseFloat(e.target.value))}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  type="number"
+                  label="Target Value"
+                  fullWidth
+                  size="small"
+                  value={formData.target_value ?? ''}
+                  onChange={(e) => handleChange('target_value', parseFloat(e.target.value))}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  type="number"
+                  label="After Value"
+                  fullWidth
+                  size="small"
+                  value={formData.after_value ?? ''}
+                  onChange={(e) => handleChange('after_value', parseFloat(e.target.value))}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  type="number"
+                  label="Cost Saving ($ USD/Year)"
+                  fullWidth
+                  size="small"
+                  value={formData.cost_saving ?? 0}
+                  onChange={(e) => handleChange('cost_saving', parseFloat(e.target.value))}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  select
+                  label="Horizontal Deployment (Yokoten)"
+                  fullWidth
+                  size="small"
+                  value={formData.horizontal_deploy || 'No'}
+                  onChange={(e) => handleChange('horizontal_deploy', e.target.value)}
+                >
+                  <MenuItem value="Yes">Yes</MenuItem>
+                  <MenuItem value="No">No</MenuItem>
+                </TextField>
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <TextField select label="QA Verification Result" fullWidth size="small" value={formData.result || '-'} onChange={(e) => handleChange('result', e.target.value)}>
-                <MenuItem value="PASS">PASS</MenuItem>
-                <MenuItem value="FAIL">FAIL</MenuItem>
-                <MenuItem value="-">-</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={4}>
-              <TextField type="number" label="Before Value" fullWidth size="small" value={formData.before_value ?? ''} onChange={(e) => handleChange('before_value', parseFloat(e.target.value))} />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField type="number" label="Target Value" fullWidth size="small" value={formData.target_value ?? ''} onChange={(e) => handleChange('target_value', parseFloat(e.target.value))} />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField type="number" label="After Value" fullWidth size="small" value={formData.after_value ?? ''} onChange={(e) => handleChange('after_value', parseFloat(e.target.value))} />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField type="number" label="Cost Saving ($ USD/Year)" fullWidth size="small" value={formData.cost_saving ?? 0} onChange={(e) => handleChange('cost_saving', parseFloat(e.target.value))} />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField select label="Horizontal Deployment (Yokoten)" fullWidth size="small" value={formData.horizontal_deploy || 'No'} onChange={(e) => handleChange('horizontal_deploy', e.target.value)}>
-                <MenuItem value="Yes">Yes</MenuItem>
-                <MenuItem value="No">No</MenuItem>
-              </TextField>
-            </Grid>
-          </Grid>
+          </Box>
         )}
 
         {/* TAB 4: TPM Review & Approval */}
         {activeTab === 4 && (
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <TextField label="Reviewed By" fullWidth size="small" value={formData.tpm_reviewed_by || ''} onChange={(e) => handleChange('tpm_reviewed_by', e.target.value)} />
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#1565C0', mb: 2 }}>TPM Review & Approval (Optional)</Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  label="Reviewed By"
+                  fullWidth
+                  size="small"
+                  value={formData.tpm_reviewed_by || ''}
+                  onChange={(e) => handleChange('tpm_reviewed_by', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  type="date"
+                  label="Review Date"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  size="small"
+                  value={formData.tpm_review_date || ''}
+                  onChange={(e) => handleChange('tpm_review_date', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Review Comment"
+                  multiline
+                  rows={2}
+                  fullWidth
+                  size="small"
+                  value={formData.tpm_review_comment || ''}
+                  onChange={(e) => handleChange('tpm_review_comment', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  select
+                  label="TPM Decision"
+                  fullWidth
+                  size="small"
+                  value={formData.tpm_decision || 'Approved'}
+                  onChange={(e) => handleChange('tpm_decision', e.target.value)}
+                >
+                  <MenuItem value="Approved">Approved</MenuItem>
+                  <MenuItem value="Not Approved">Not Approved</MenuItem>
+                  <MenuItem value="Pending">Pending</MenuItem>
+                </TextField>
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <TextField type="date" label="Review Date" InputLabelProps={{ shrink: true }} fullWidth size="small" value={formData.tpm_review_date || ''} onChange={(e) => handleChange('tpm_review_date', e.target.value)} />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField label="Review Comment" multiline rows={2} fullWidth size="small" value={formData.tpm_review_comment || ''} onChange={(e) => handleChange('tpm_review_comment', e.target.value)} />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField select label="TPM Decision" fullWidth size="small" value={formData.tpm_decision || 'Approved'} onChange={(e) => handleChange('tpm_decision', e.target.value)}>
-                <MenuItem value="Approved">Approved</MenuItem>
-                <MenuItem value="Not Approved">Not Approved</MenuItem>
-                <MenuItem value="Pending">Pending</MenuItem>
-              </TextField>
-            </Grid>
-          </Grid>
+          </Box>
         )}
       </DialogContent>
 
@@ -330,7 +667,14 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
         ) : <Box />}
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button variant="outlined" onClick={onClose}>Cancel</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />} onClick={handleSave} disabled={saving}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<SaveIcon />}
+            onClick={handleSave}
+            disabled={saving || !isFormValid()}
+            title={!isFormValid() ? 'Please fill in all required fields' : 'Save changes'}
+          >
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </Box>
