@@ -134,7 +134,7 @@ export default function CIRequestFormPrintView({ project }) {
           </TableRow>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8fafc' }}>Review Comment</TableCell>
-            <TableCell colSpan={3}>{project.tpm_review_comment || 'Approved for CI project execution.'}</TableCell>
+            <TableCell colSpan={3}>{project.tpm_review_comment || ''}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8fafc' }}>Decision</TableCell>
