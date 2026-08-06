@@ -608,7 +608,10 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
         {activeTab === 4 && (
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#1565C0', mb: 2 }}>TPM Review & Approval (Optional)</Typography>
-            <Grid container spacing={2}>
+            
+            {/* Review Section */}
+            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#666', mb: 1.5, mt: 2 }}>📋 Review</Typography>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid item xs={6}>
                 <TextField
                   label="Reviewed By"
@@ -638,6 +641,42 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
                   size="small"
                   value={formData.tpm_review_comment || ''}
                   onChange={(e) => handleChange('tpm_review_comment', e.target.value)}
+                />
+              </Grid>
+            </Grid>
+
+            {/* Approval Section */}
+            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#666', mb: 1.5 }}>✅ Approval</Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <TextField
+                  label="Approved By"
+                  fullWidth
+                  size="small"
+                  value={formData.tpm_approved_by || ''}
+                  onChange={(e) => handleChange('tpm_approved_by', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  type="date"
+                  label="Approve Date"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  size="small"
+                  value={formData.tpm_approve_date || ''}
+                  onChange={(e) => handleChange('tpm_approve_date', e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Approve Comment"
+                  multiline
+                  rows={2}
+                  fullWidth
+                  size="small"
+                  value={formData.tpm_approve_comment || ''}
+                  onChange={(e) => handleChange('tpm_approve_comment', e.target.value)}
                 />
               </Grid>
               <Grid item xs={6}>
