@@ -65,12 +65,12 @@ def seed_db():
                     {"name": "department", "value": "EN", "enabled": True, "auto_increment": False},
                     {"name": "category", "value": "R", "enabled": True, "auto_increment": False},
                     {"name": "year", "value": "00", "enabled": True, "auto_increment": False},
-                    {"name": "sequence", "value": "0000", "enabled": True, "auto_increment": False},
-                    {"name": "version", "value": "00", "enabled": True, "auto_increment": False},
+                    {"name": "sequence", "value": "0001", "enabled": True, "auto_increment": False},
+                    {"name": "version", "value": "02", "enabled": True, "auto_increment": False},
                     {"name": "counter", "value": "000", "enabled": True, "auto_increment": True}
                 ],
                 "separator": "-",
-                "next_counter": 1,
+                "next_counter": 7,
                 "last_updated": datetime.utcnow().isoformat()
             }
             admin_setting = AdminSetting(
@@ -106,7 +106,7 @@ def seed_db():
         if db.query(CIProject).count() == 0:
             seed_projects = [
                 {
-                    "ci_no": "CI-26-001",
+                    "ci_no": "UTIV-EN-R-00-0001-02-001",
                     "title": "Stain 2 Defect Improvement",
                     "category": "Quality",
                     "department": "Quality",
@@ -134,44 +134,29 @@ def seed_db():
                     "current_status": "Defect rate at 2.50% causing yield loss.",
                     "target_description": "Reduce stain 2 defect rate to <= 0.20%.",
                     "expected_benefit": "Yield improvement and $12,000 annual saving.",
-                    "related_process": "Slit Coater Line 1 & Line 2",
-                    "define_stage": {"background": "Customer complaint on coating stain.", "scope": "Slit Coater 1", "team_members": "Park, Lee, Kim"},
-                    "analyze_stage": {
-                        "five_why": [
-                            {"why": "Why is stain 2 defect high?", "answer": "Coating nozzle micro-clogging"},
-                            {"why": "Why is nozzle clogging?", "answer": "Chemical residue drying during idle time"},
-                            {"why": "Why is residue drying?", "answer": "Nozzle cap purge pressure insufficient"},
-                            {"why": "Why is pressure insufficient?", "answer": "Purge line regulator setting decayed"},
-                            {"why": "Why did setting decay?", "answer": "Lack of periodic PM calibration checklist"}
-                        ],
-                        "fishbone": {
-                            "Machine": ["Nozzle cap pressure low", "Filter clogging"],
-                            "Man": ["Operator cleaning procedure mismatch"],
-                            "Material": ["Coating solvent viscosity variation"],
-                            "Method": ["Purge frequency insufficient"]
-                        }
-                    }
+                    "related_process": "Slit Coater Line 1 & Line 2"
                 },
                 {
-                    "ci_no": "CI-26-002",
+                    "ci_no": "UTIV-EN-R-00-0001-02-002",
                     "title": "Takt Time Improvement",
                     "category": "Productivity",
                     "department": "Production",
                     "process_area": "Slit Coater",
                     "start_date": "2026-07-08",
                     "due_date": "2026-08-15",
-                    "close_date": None,
-                    "status": "Running",
+                    "close_date": "2026-08-10",
+                    "status": "Complete",
                     "priority": "High",
                     "owner": "Kim Tae-hyung",
                     "requester": "Choi Woo-shik",
                     "kpi_metric": "UPH (pcs/hr)",
                     "before_value": 274.0,
                     "target_value": 443.0,
-                    "after_value": 379.0,
-                    "achievement_rate": 63.0,
-                    "result": "-",
-                    "verified": "No",
+                    "after_value": 420.0,
+                    "achievement_rate": 90.0,
+                    "result": "PASS",
+                    "verified": "Yes",
+                    "closing_days": 33,
                     "cost_saving": 18500.0,
                     "horizontal_deploy": "Yes",
                     "issue_description": "Substrate loading cycle time bottlenecking overall line throughput.",
@@ -180,25 +165,26 @@ def seed_db():
                     "expected_benefit": "Increase monthly production output by 15%."
                 },
                 {
-                    "ci_no": "CI-26-003",
+                    "ci_no": "UTIV-EN-R-00-0001-02-003",
                     "title": "Waviness Defect Improvement",
                     "category": "Quality",
                     "department": "Quality",
                     "process_area": "Wet Bench",
                     "start_date": "2026-07-10",
                     "due_date": "2026-08-20",
-                    "close_date": None,
-                    "status": "Running",
+                    "close_date": "2026-08-15",
+                    "status": "Complete",
                     "priority": "Medium",
                     "owner": "Choi Jin-soo",
                     "requester": "Kang Daniel",
                     "kpi_metric": "Defect Rate (%)",
                     "before_value": 3.10,
                     "target_value": 0.00,
-                    "after_value": 0.00,
+                    "after_value": 0.15,
                     "achievement_rate": 100.0,
                     "result": "PASS",
                     "verified": "Yes",
+                    "closing_days": 36,
                     "cost_saving": 8800.0,
                     "horizontal_deploy": "No",
                     "issue_description": "Surface waviness defect observed during wet etching stage.",
@@ -206,7 +192,7 @@ def seed_db():
                     "target_description": "Zero waviness defect rate."
                 },
                 {
-                    "ci_no": "CI-26-004",
+                    "ci_no": "UTIV-EN-R-00-0001-02-004",
                     "title": "Reduce CPM Defect in IOX",
                     "category": "Quality",
                     "department": "Quality",
@@ -233,15 +219,15 @@ def seed_db():
                     "target_description": "Reduce CPM defect to <= 1.50%."
                 },
                 {
-                    "ci_no": "CI-26-005",
+                    "ci_no": "UTIV-EN-R-00-0001-02-005",
                     "title": "Chemical Usage Reduction",
                     "category": "Cost Saving",
                     "department": "TPM",
                     "process_area": "Overall",
                     "start_date": "2026-07-18",
                     "due_date": "2026-08-10",
-                    "close_date": None,
-                    "status": "Running",
+                    "close_date": "2026-08-08",
+                    "status": "Complete",
                     "priority": "Medium",
                     "owner": "Jung Hae-in",
                     "requester": "Bae Suzy",
@@ -250,51 +236,44 @@ def seed_db():
                     "target_value": 7500.0,
                     "after_value": 7800.0,
                     "achievement_rate": 81.0,
-                    "result": "-",
-                    "verified": "No",
+                    "result": "PASS",
+                    "verified": "Yes",
+                    "closing_days": 21,
                     "cost_saving": 2000.0,
                     "horizontal_deploy": "No",
                     "issue_description": "Over-consumption of cleaning solvent during line flush.",
                     "current_status": "Monthly spend $9,500.",
                     "target_description": "Reduce monthly spend to <= $7,500."
+                },
+                {
+                    "ci_no": "UTIV-EN-R-00-0001-02-006",
+                    "title": "Equipment Efficiency Optimization",
+                    "category": "Equipment",
+                    "department": "Maintenance",
+                    "process_area": "Slit Coater",
+                    "start_date": "2026-07-20",
+                    "due_date": "2026-08-25",
+                    "close_date": "2026-08-20",
+                    "status": "Complete",
+                    "priority": "Medium",
+                    "owner": "Lee Ji-woo",
+                    "requester": "Park Seo-joon",
+                    "kpi_metric": "OEE (%)",
+                    "before_value": 78.0,
+                    "target_value": 90.0,
+                    "after_value": 88.5,
+                    "achievement_rate": 95.0,
+                    "result": "PASS",
+                    "verified": "Yes",
+                    "closing_days": 31,
+                    "cost_saving": 15000.0,
+                    "horizontal_deploy": "Yes",
+                    "issue_description": "Equipment downtime reducing line OEE below target.",
+                    "current_status": "Current OEE is 78%.",
+                    "target_description": "Improve OEE to >= 90%.",
+                    "expected_benefit": "Reduce equipment-related losses by 12%."
                 }
             ]
-
-            # Generate 19 more projects for 24 total
-            more_categories = ["Quality", "Productivity", "Cost Saving", "Safety / Environment", "Equipment"]
-            more_depts = ["Slit Coater", "Wet Bench", "IOX", "Overall", "Maintenance", "Logistics"]
-            
-            for i in range(6, 25):
-                cat = more_categories[i % len(more_categories)]
-                dept = more_depts[i % len(more_depts)]
-                is_complete = (i <= 18)
-                
-                seed_projects.append({
-                    "ci_no": f"CI-26-{i:03d}",
-                    "title": f"{dept} {cat} Optimization Phase {i-5}",
-                    "category": cat,
-                    "department": dept,
-                    "process_area": dept,
-                    "start_date": f"2026-06-0{i%9+1}",
-                    "due_date": f"2026-07-2{i%9+1}",
-                    "close_date": f"2026-07-2{i%9+1}" if is_complete else None,
-                    "status": "Complete" if is_complete else "Running",
-                    "priority": "High" if i % 2 == 0 else "Medium",
-                    "owner": f"Engineer {i}",
-                    "requester": f"Manager {i}",
-                    "kpi_metric": "Defect Rate (%)" if cat == "Quality" else "Efficiency (%)",
-                    "before_value": 5.0 + i,
-                    "target_value": 1.0,
-                    "after_value": 1.1 if is_complete else 2.5,
-                    "achievement_rate": 95.0 if is_complete else 60.0,
-                    "result": "PASS" if is_complete else "-",
-                    "verified": "Yes" if is_complete else "No",
-                    "closing_days": 20 + (i % 15) if is_complete else None,
-                    "cost_saving": 1000.0 * (i % 5 + 1),
-                    "horizontal_deploy": "Yes" if i % 4 == 0 else "No",
-                    "issue_description": f"Operational optimization for {dept} {cat}.",
-                    "current_status": "Targeting standard operating procedure alignment."
-                })
 
             for proj_data in seed_projects:
                 p = CIProject(**proj_data)
@@ -321,8 +300,8 @@ def seed_db():
                     avg_closing_days=avg_days,
                     cost_saving=cost_saving,
                     horizontal_deployment_count=horizontal,
-                    total_projects_completed=10 + (month % 5),
-                    total_projects_running=5 + (month % 3)
+                    total_projects_completed=6,
+                    total_projects_running=0
                 )
                 db.add(snapshot)
             db.commit()
