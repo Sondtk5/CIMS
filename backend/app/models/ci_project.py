@@ -53,6 +53,9 @@ class CIProject(Base):
     tpm_review_date = Column(String, nullable=True)
     tpm_review_comment = Column(Text, nullable=True)
     tpm_decision = Column(String, default="Pending") # Approved, Not Approved, Pending
+    tpm_approved_by = Column(String, nullable=True)
+    tpm_approve_date = Column(String, nullable=True)
+    tpm_approve_comment = Column(Text, nullable=True)
     
     # DMAIC 5-Phase Detailed Content (JSON objects / Text blocks)
     define_stage = Column(JSON, nullable=True)   # { background, scope, team_members, etc. }
