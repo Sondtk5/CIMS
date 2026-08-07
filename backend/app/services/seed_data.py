@@ -296,7 +296,10 @@ def seed_production_data(db: Session):
             "current_status": "Defect rate at 2.50% causing yield loss.",
             "target_description": "Reduce stain 2 defect rate to <= 0.20%.",
             "expected_benefit": "Yield improvement and $12,000 annual saving.",
-            "related_process": "Slit Coater Line 1 & Line 2"
+            "related_process": "Slit Coater Line 1 & Line 2",
+            "tpm_reviewed_by": "TPM Manager Kim",
+            "tpm_review_date": "2026-07-20",
+            "tpm_decision": "Approved"
         },
         {
             "ci_no": "UTIV-EN-R-26-0001-02-002",
@@ -324,7 +327,10 @@ def seed_production_data(db: Session):
             "issue_description": "Substrate loading cycle time bottlenecking overall line throughput.",
             "current_status": "Current UPH is 274 pcs/hr.",
             "target_description": "Increase UPH to >= 443 pcs/hr.",
-            "expected_benefit": "Increase monthly production output by 15%."
+            "expected_benefit": "Increase monthly production output by 15%.",
+            "tpm_reviewed_by": "TPM Manager Lee",
+            "tpm_review_date": "2026-08-05",
+            "tpm_decision": "Approved"
         },
         {
             "ci_no": "UTIV-EN-R-26-0001-02-003",
@@ -351,7 +357,10 @@ def seed_production_data(db: Session):
             "horizontal_deploy": "No",
             "issue_description": "Surface waviness defect observed during wet etching stage.",
             "current_status": "Defect rate at 3.10%.",
-            "target_description": "Zero waviness defect rate."
+            "target_description": "Zero waviness defect rate.",
+            "tpm_reviewed_by": "TPM Manager Park",
+            "tpm_review_date": "2026-08-12",
+            "tpm_decision": "Approved"
         },
         {
             "ci_no": "UTIV-EN-R-26-0001-02-004",
@@ -378,7 +387,10 @@ def seed_production_data(db: Session):
             "horizontal_deploy": "Yes",
             "issue_description": "CPM particle defect after chemical ion exchange process.",
             "current_status": "Defect rate dropped from 12% to 1.85%.",
-            "target_description": "Reduce CPM defect to <= 1.50%."
+            "target_description": "Reduce CPM defect to <= 1.50%.",
+            "tpm_reviewed_by": "TPM Manager Choi",
+            "tpm_review_date": "2026-07-22",
+            "tpm_decision": "Pending"
         },
         {
             "ci_no": "UTIV-EN-R-26-0001-02-005",
@@ -405,7 +417,10 @@ def seed_production_data(db: Session):
             "horizontal_deploy": "No",
             "issue_description": "Over-consumption of cleaning solvent during line flush.",
             "current_status": "Monthly spend $9,500.",
-            "target_description": "Reduce monthly spend to <= $7,500."
+            "target_description": "Reduce monthly spend to <= $7,500.",
+            "tpm_reviewed_by": "",
+            "tpm_review_date": "",
+            "tpm_decision": "Pending"
         },
         {
             "ci_no": "UTIV-EN-R-26-0001-02-006",
@@ -433,7 +448,10 @@ def seed_production_data(db: Session):
             "issue_description": "Equipment downtime reducing line OEE below target.",
             "current_status": "Current OEE is 78%.",
             "target_description": "Improve OEE to >= 90%.",
-            "expected_benefit": "Reduce equipment-related losses by 12%."
+            "expected_benefit": "Reduce equipment-related losses by 12%.",
+            "tpm_reviewed_by": "TPM Manager Song",
+            "tpm_review_date": "2026-08-18",
+            "tpm_decision": "Approved"
         }
     ]
     
