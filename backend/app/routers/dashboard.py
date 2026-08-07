@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.core.rbac import get_current_user
+from app.core.config import get_mode
 from app.services.kpi_calculator import calculate_kpis, save_current_month_snapshot
 from datetime import datetime
 
@@ -17,11 +18,12 @@ def get_dashboard_summary(
 ):
     """
     Dashboard accessible to all logged-in users.
+    Automatically filters by current app mode (DEMO or PRODUCTION).
     Query Parameters:
     - year: Filter by year (2024, 2025, 2026) or None for all years combined
     """
-    # Pass year directly - None means all years
-    return calculate_kpis(db, year)
+    current_mode = get_mode()
+    return calculate_kpis(db, year, current_mode)
 
 
 @router.post("/snapshot/save-current-month")
@@ -50,20 +52,23 @@ def get_available_years(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get list of available years from CI projects (based on start_date).
-    Returns sorted list of unique years from all CI projects.
+    Get list of available years from CI projects filtered by current mode.
+    Returns sorted list of unique years from CI projects for current mode.
     """
     from sqlalchemy import func, cast, Integer
     from app.models.ci_project import CIProject
     
-    # Get unique years from CI projects start_date
+    current_mode = get_mode()
+    
+    # Get unique years from CI projects start_date, filtered by mode
     years_result = db.query(
         cast(
             func.substr(CIProject.start_date, 1, 4),
             Integer
         ).distinct()
     ).filter(
-        CIProject.start_date.isnot(None)
+        (CIProject.start_date.isnot(None)) &
+        (CIProject.mode == current_mode)
     ).all()
     
     # Flatten and sort years

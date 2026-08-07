@@ -6,6 +6,7 @@ from app.models.ci_project import CIProject
 from app.models.user import User
 from app.schemas.ci_project import CIProjectCreate, CIProjectUpdate, CIProjectResponse
 from app.core.rbac import get_current_user, require_roles
+from app.core.config import get_mode
 from app.services.audit_logger import log_audit_event
 from app.services.ci_numbering_service import generate_ci_number
 from datetime import datetime
@@ -22,8 +23,9 @@ def get_projects(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get projects - all users can view, filters apply based on role"""
-    query = db.query(CIProject)
+    """Get projects - filtered by current app mode (DEMO or PRODUCTION)"""
+    current_mode = get_mode()
+    query = db.query(CIProject).filter(CIProject.mode == current_mode)
     
     if search:
         s = f"%{search}%"
@@ -50,8 +52,12 @@ def get_project_by_id(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get single project - all users can view"""
-    project = db.query(CIProject).filter(CIProject.id == project_id).first()
+    """Get single project - checks mode"""
+    current_mode = get_mode()
+    project = db.query(CIProject).filter(
+        (CIProject.id == project_id) & 
+        (CIProject.mode == current_mode)
+    ).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
@@ -94,7 +100,8 @@ def create_project(
         **project_in.model_dump(exclude_unset=True),
         achievement_rate=ach_rate,
         closing_days=closing_days,
-        owner_id=current_user.id  # Track who created this project
+        owner_id=current_user.id,  # Track who created this project
+        mode=get_mode()  # Assign to current mode
     )
     
     db.add(db_project)

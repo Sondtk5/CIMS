@@ -18,9 +18,9 @@ def seed_demo_data(db: Session):
     CI numbering format: UTIV-EN-R-YY-0000-00-###
     """
     # Check if demo data already exists
-    existing_count = db.query(CIProject).count()
+    existing_count = db.query(CIProject).filter(CIProject.mode == "DEMO").count()
     if existing_count > 0:
-        return {"status": "skipped", "message": "Data already exists"}
+        return {"status": "skipped", "message": "Demo data already exists"}
     
     demo_projects = []
     counter = 1
@@ -241,8 +241,9 @@ def seed_demo_data(db: Session):
         demo_projects.append(add_project(title, process, metric, before, target, after, cost, deploy, month, 2026, status))
         counter += 1
     
-    # Insert all projects
+    # Insert all projects with mode='DEMO'
     for project_data in demo_projects:
+        project_data['mode'] = 'DEMO'
         project = CIProject(**project_data)
         db.add(project)
     
@@ -250,8 +251,204 @@ def seed_demo_data(db: Session):
     
     return {
         "status": "success",
-        "message": f"Seeded {len(demo_projects)} comprehensive demo projects (133 total: 2024=20, 2025=45, 2026=68)",
+        "message": f"Seeded {len(demo_projects)} demo projects (133 total: 2024=20, 2025=45, 2026=68)",
         "count": len(demo_projects)
+    }
+
+
+def seed_production_data(db: Session):
+    """
+    Load production CI project data (real data).
+    Creates 6 realistic CI projects for 2026.
+    """
+    # Check if production data already exists
+    existing_count = db.query(CIProject).filter(CIProject.mode == "PRODUCTION").count()
+    if existing_count > 0:
+        return {"status": "skipped", "message": "Production data already exists"}
+    
+    production_projects = [
+        {
+            "ci_no": "UTIV-EN-R-26-0001-02-001",
+            "title": "Stain 2 Defect Improvement",
+            "category": "Quality",
+            "department": "Quality",
+            "process_area": "Slit Coater",
+            "start_date": "2026-07-05",
+            "due_date": "2026-07-31",
+            "close_date": "2026-07-28",
+            "status": "Complete",
+            "priority": "High",
+            "owner": "Park Ji-sung",
+            "requester": "Lee Min-ho",
+            "kpi_metric": "Defect Rate (%)",
+            "before_value": 2.50,
+            "target_value": 0.20,
+            "after_value": 0.18,
+            "achievement_rate": 116.0,
+            "result": "PASS",
+            "verified": "Yes",
+            "verified_by": "QA Inspector Kim",
+            "verified_date": "2026-07-29",
+            "closing_days": 23,
+            "cost_saving": 12000.0,
+            "horizontal_deploy": "Yes",
+            "issue_description": "Stain 2 defects occurred intermittently on glass substrate after coating process.",
+            "current_status": "Defect rate at 2.50% causing yield loss.",
+            "target_description": "Reduce stain 2 defect rate to <= 0.20%.",
+            "expected_benefit": "Yield improvement and $12,000 annual saving.",
+            "related_process": "Slit Coater Line 1 & Line 2"
+        },
+        {
+            "ci_no": "UTIV-EN-R-26-0001-02-002",
+            "title": "Takt Time Improvement",
+            "category": "Productivity",
+            "department": "Production",
+            "process_area": "Slit Coater",
+            "start_date": "2026-07-08",
+            "due_date": "2026-08-15",
+            "close_date": "2026-08-10",
+            "status": "Complete",
+            "priority": "High",
+            "owner": "Kim Tae-hyung",
+            "requester": "Choi Woo-shik",
+            "kpi_metric": "UPH (pcs/hr)",
+            "before_value": 274.0,
+            "target_value": 443.0,
+            "after_value": 420.0,
+            "achievement_rate": 90.0,
+            "result": "PASS",
+            "verified": "Yes",
+            "closing_days": 33,
+            "cost_saving": 18500.0,
+            "horizontal_deploy": "Yes",
+            "issue_description": "Substrate loading cycle time bottlenecking overall line throughput.",
+            "current_status": "Current UPH is 274 pcs/hr.",
+            "target_description": "Increase UPH to >= 443 pcs/hr.",
+            "expected_benefit": "Increase monthly production output by 15%."
+        },
+        {
+            "ci_no": "UTIV-EN-R-26-0001-02-003",
+            "title": "Waviness Defect Improvement",
+            "category": "Quality",
+            "department": "Quality",
+            "process_area": "Wet Bench",
+            "start_date": "2026-07-10",
+            "due_date": "2026-08-20",
+            "close_date": "2026-08-15",
+            "status": "Complete",
+            "priority": "Medium",
+            "owner": "Choi Jin-soo",
+            "requester": "Kang Daniel",
+            "kpi_metric": "Defect Rate (%)",
+            "before_value": 3.10,
+            "target_value": 0.00,
+            "after_value": 0.15,
+            "achievement_rate": 100.0,
+            "result": "PASS",
+            "verified": "Yes",
+            "closing_days": 36,
+            "cost_saving": 8800.0,
+            "horizontal_deploy": "No",
+            "issue_description": "Surface waviness defect observed during wet etching stage.",
+            "current_status": "Defect rate at 3.10%.",
+            "target_description": "Zero waviness defect rate."
+        },
+        {
+            "ci_no": "UTIV-EN-R-26-0001-02-004",
+            "title": "Reduce CPM Defect in IOX",
+            "category": "Quality",
+            "department": "Quality",
+            "process_area": "IOX",
+            "start_date": "2026-07-15",
+            "due_date": "2026-07-28",
+            "close_date": "2026-07-28",
+            "status": "Complete",
+            "priority": "High",
+            "owner": "Song Hye-kyo",
+            "requester": "Han So-hee",
+            "kpi_metric": "Defect Rate (%)",
+            "before_value": 12.00,
+            "target_value": 1.50,
+            "after_value": 1.85,
+            "achievement_rate": 92.0,
+            "result": "FAIL",
+            "verified": "Yes",
+            "closing_days": 13,
+            "cost_saving": 13000.0,
+            "horizontal_deploy": "Yes",
+            "issue_description": "CPM particle defect after chemical ion exchange process.",
+            "current_status": "Defect rate dropped from 12% to 1.85%.",
+            "target_description": "Reduce CPM defect to <= 1.50%."
+        },
+        {
+            "ci_no": "UTIV-EN-R-26-0001-02-005",
+            "title": "Chemical Usage Reduction",
+            "category": "Cost Saving",
+            "department": "TPM",
+            "process_area": "Overall",
+            "start_date": "2026-07-18",
+            "due_date": "2026-08-10",
+            "close_date": "2026-08-08",
+            "status": "Complete",
+            "priority": "Medium",
+            "owner": "Jung Hae-in",
+            "requester": "Bae Suzy",
+            "kpi_metric": "Chemical Cost (USD/Month)",
+            "before_value": 9500.0,
+            "target_value": 7500.0,
+            "after_value": 7800.0,
+            "achievement_rate": 81.0,
+            "result": "PASS",
+            "verified": "Yes",
+            "closing_days": 21,
+            "cost_saving": 2000.0,
+            "horizontal_deploy": "No",
+            "issue_description": "Over-consumption of cleaning solvent during line flush.",
+            "current_status": "Monthly spend $9,500.",
+            "target_description": "Reduce monthly spend to <= $7,500."
+        },
+        {
+            "ci_no": "UTIV-EN-R-26-0001-02-006",
+            "title": "Equipment Efficiency Optimization",
+            "category": "Equipment",
+            "department": "Maintenance",
+            "process_area": "Slit Coater",
+            "start_date": "2026-07-20",
+            "due_date": "2026-08-25",
+            "close_date": "2026-08-20",
+            "status": "Complete",
+            "priority": "Medium",
+            "owner": "Lee Ji-woo",
+            "requester": "Park Seo-joon",
+            "kpi_metric": "OEE (%)",
+            "before_value": 78.0,
+            "target_value": 90.0,
+            "after_value": 88.5,
+            "achievement_rate": 95.0,
+            "result": "PASS",
+            "verified": "Yes",
+            "closing_days": 31,
+            "cost_saving": 15000.0,
+            "horizontal_deploy": "Yes",
+            "issue_description": "Equipment downtime reducing line OEE below target.",
+            "current_status": "Current OEE is 78%.",
+            "target_description": "Improve OEE to >= 90%.",
+            "expected_benefit": "Reduce equipment-related losses by 12%."
+        }
+    ]
+    
+    # Insert all production projects with mode='PRODUCTION'
+    for project_data in production_projects:
+        project_data['mode'] = 'PRODUCTION'
+        project = CIProject(**project_data)
+        db.add(project)
+    
+    db.commit()
+    
+    return {
+        "status": "success",
+        "message": f"Seeded {len(production_projects)} production projects",
+        "count": len(production_projects)
     }
 
 def clear_all_data(db: Session):

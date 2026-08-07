@@ -5,17 +5,15 @@ from app.models.kpi_target import KPITarget
 from app.models.monthly_kpi_snapshot import MonthlyKPISnapshot
 from datetime import datetime
 
-def calculate_kpis(db: Session, year: int = None):
+def calculate_kpis(db: Session, year: int = None, mode: str = "PRODUCTION"):
     """
     Calculate KPIs with REAL data from CI projects ONLY.
     Monthly trends calculated from close_date of completed projects.
     If year=None: aggregate ALL projects from all years (All Years mode)
     If year specified: filter to that specific year
+    mode: Filter by DEMO or PRODUCTION
     NO sample data, NO snapshots - fully dynamic.
     """
-    # Track if we're in "all years" mode
-    all_years_mode = (year is None)
-    # If year is None, set a default for monthly trend year field, but keep filtering as None
     year_for_display = year if year is not None else datetime.now().year
     
     # Fetch KPI Targets from DB
@@ -29,8 +27,8 @@ def calculate_kpis(db: Session, year: int = None):
     target_cost_saving = targets_map.get("cost_saving").target_value if targets_map.get("cost_saving") else 50000.0
     target_horizontal = targets_map.get("horizontal_deployment").target_value if targets_map.get("horizontal_deployment") else 3.0
 
-    # Filter projects by year (based on start_date)
-    all_projects_raw = db.query(CIProject).all()
+    # Filter projects by mode first
+    all_projects_raw = db.query(CIProject).filter(CIProject.mode == mode).all()
     
     # Filter by year for summary cards
     all_projects = []
@@ -154,8 +152,6 @@ def calculate_kpis(db: Session, year: int = None):
         category_counts[cat] = category_counts.get(cat, 0) + 1
 
     # ====== MONTHLY TREND: 100% DYNAMIC FROM CI PROJECTS ======
-    # Calculate for ALL months based on close_date of completed CI projects
-    # NO database snapshots, NO sample data - pure real data
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     monthly_on_time = [None] * 12
     monthly_effectiveness = [None] * 12
@@ -207,7 +203,6 @@ def calculate_kpis(db: Session, year: int = None):
                 monthly_avg_days[month_idx] = round(sum(month_closing_days) / len(month_closing_days), 1)
             else:
                 monthly_avg_days[month_idx] = 0.0
-        # If no completed projects in this month, leave as None (no data to show)
 
     return {
         "summary_cards": {
@@ -235,26 +230,21 @@ def calculate_kpis(db: Session, year: int = None):
             "on_time_rate": monthly_on_time,
             "effectiveness_rate": monthly_effectiveness,
             "avg_closing_time": monthly_avg_days,
-            "year": year_for_display
+            "year": year_for_display,
+            "mode": mode
         }
     }
 
 
-def save_current_month_snapshot(db: Session):
-    """
-    [DEPRECATED] This function is no longer needed.
-    Monthly KPI trends are now 100% calculated from CI projects in real-time.
-    Keeping for backwards compatibility but it's not used.
-    """
+def save_current_month_snapshot(db: Session, mode: str = "PRODUCTION"):
+    """[DEPRECATED] Keeping for backwards compatibility but not used."""
     now = datetime.now()
     year = now.year
     month = now.month
     
-    # Calculate current KPIs
-    kpi_data = calculate_kpis(db, year)
+    kpi_data = calculate_kpis(db, year, mode)
     summary = kpi_data["summary_cards"]
     
-    # Check if snapshot already exists for this month
     existing = db.query(MonthlyKPISnapshot).filter(
         and_(
             MonthlyKPISnapshot.year == year,
@@ -273,14 +263,12 @@ def save_current_month_snapshot(db: Session):
     }
     
     if existing:
-        # Update existing snapshot
         for key, value in snapshot_data.items():
             setattr(existing, key, value)
         db.commit()
         db.refresh(existing)
         return {"action": "updated", "snapshot": existing}
     else:
-        # Create new snapshot
         new_snapshot = MonthlyKPISnapshot(
             year=year,
             month=month,

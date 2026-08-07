@@ -7,7 +7,7 @@ from app.models.ci_project import CIProject
 from app.models.monthly_kpi_snapshot import MonthlyKPISnapshot
 from app.models.admin_setting import AdminSetting
 from app.core.security import get_password_hash
-from app.services.seed_data import seed_demo_data
+from app.services.seed_data import seed_demo_data, seed_production_data
 from datetime import datetime
 
 def seed_db():
@@ -103,8 +103,9 @@ def seed_db():
                 db.add(t)
             db.commit()
 
-        # 5. Seed CI Projects - Use comprehensive demo data (133 projects)
+        # 5. Seed CI Projects - Demo data (133 projects) and Production data (6 projects)
         seed_demo_data(db)
+        seed_production_data(db)
 
         # 6. Seed Monthly KPI Snapshots for 2026 if empty
         if db.query(MonthlyKPISnapshot).count() == 0:
