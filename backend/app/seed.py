@@ -8,9 +8,12 @@ from app.models.monthly_kpi_snapshot import MonthlyKPISnapshot
 from app.models.admin_setting import AdminSetting
 from app.core.security import get_password_hash
 from app.services.seed_data import seed_demo_data, seed_production_data
+from app.migrations_mode import add_mode_column
 from datetime import datetime
 
 def seed_db():
+    # Drop ALL tables and recreate with new schema (includes mode column)
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
