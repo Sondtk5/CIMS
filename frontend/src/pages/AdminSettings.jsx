@@ -258,18 +258,21 @@ export default function AdminSettings() {
 
   // Application Mode Toggle
   const handleToggleMode = async () => {
-    const newMode = appMode === 'demo' ? 'production' : 'demo';
+    const newMode = appMode === 'DEMO' ? 'PRODUCTION' : 'DEMO';
     setTogglingMode(true);
     try {
       await settingsAPI.setMode(newMode);
       setAppMode(newMode);
       setMsg({ 
         open: true, 
-        text: `Switched to ${newMode.toUpperCase()} mode - Page will refresh in 2 seconds`, 
+        text: `Switched to ${newMode} mode instantly - No restart needed!`, 
         type: 'success' 
       });
-      // Refresh page after 2 seconds to reload all data
-      setTimeout(() => window.location.reload(), 2000);
+      // Auto-reload data after 1 second
+      setTimeout(() => {
+        loadData();
+        window.location.reload(); // Soft reload to refresh all data
+      }, 1500);
     } catch (err) {
       setMsg({ open: true, text: err.response?.data?.detail || 'Failed to toggle mode', type: 'error' });
     } finally {

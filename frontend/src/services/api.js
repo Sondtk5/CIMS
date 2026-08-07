@@ -51,7 +51,7 @@ export const settingsAPI = {
   getCINumberingConfig: () => api.get('/admin/ci-numbering'),
   updateCINumberingConfig: (data) => api.put('/admin/ci-numbering', data),
   getCurrentMode: () => api.get('/admin/mode'),
-  setMode: (mode) => api.put('/admin/mode', { mode }),
+  setMode: (mode) => api.put('/admin/mode', { mode: mode.toUpperCase() }),
 };
 
 export const auditAPI = {
