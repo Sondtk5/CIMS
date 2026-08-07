@@ -141,22 +141,16 @@ def get_current_mode(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(["Administrator"]))
 ):
-    """Get current application mode (demo or production)"""
-    setting = db.query(AdminSetting).filter(
-        AdminSetting.setting_key == "app_mode"
-    ).first()
+    """Get current application mode (DEMO or PRODUCTION)"""
+    from app.core.config import get_mode
     
-    current_mode = "production"
-    if setting:
-        mode_value = setting.setting_value
-        if isinstance(mode_value, dict):
-            current_mode = mode_value.get("mode", "production")
-        elif isinstance(mode_value, str):
-            current_mode = mode_value
+    current_mode = get_mode()
     
     return {
         "mode": current_mode,
-        "description": "demo" if current_mode == "demo" else "production"
+        "description": "Demo mode with 133 sample projects" if current_mode == "DEMO" else "Production mode with real data",
+        "demo_count": 133,
+        "production_count": 6
     }
 
 @router.put("/mode")
@@ -165,59 +159,38 @@ def toggle_app_mode(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(["Administrator"]))
 ):
-    """Toggle between demo and production mode"""
-    from app.services.seed_data import seed_demo_data, clear_all_data
+    """Toggle between demo and production mode (instant, no restart needed)"""
+    from app.core.config import set_mode
     
-    mode = request.mode.lower()
-    if mode not in ["demo", "production"]:
+    mode = request.mode.upper()
+    if mode not in ["DEMO", "PRODUCTION"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Mode must be 'demo' or 'production'"
+            detail="Mode must be 'DEMO' or 'PRODUCTION'"
         )
     
     try:
-        # Get or create mode setting
-        setting = db.query(AdminSetting).filter(
-            AdminSetting.setting_key == "app_mode"
-        ).first()
-        
-        if not setting:
-            setting = AdminSetting(
-                setting_key="app_mode",
-                setting_value={"mode": mode},
-                description="Application mode: demo with sample data or production with clean slate"
-            )
-            db.add(setting)
-        else:
-            setting.setting_value = {"mode": mode}
-        
-        # If switching to demo, seed sample data
-        if mode == "demo":
-            # Clear existing CI projects first (optional - keep if you want merge)
-            # clear_all_data(db)
-            seed_demo_data(db)
-            message = "Switched to DEMO mode - Sample data loaded"
-        else:
-            # Switching to production - clear all sample data
-            clear_all_data(db)
-            message = "Switched to PRODUCTION mode - All data cleared. Start fresh!"
+        # Switch mode in memory (no restart needed)
+        set_mode(mode)
         
         # Log the mode change
         mode_log = ModeLog(
-            mode=mode.upper(),
-            action=f"Switched to {mode.upper()} Mode",
+            mode=mode,
+            action=f"Switched to {mode} Mode",
             timestamp=datetime.utcnow(),
             user=current_user.username,
-            details=message
+            details=f"User {current_user.full_name} switched mode to {mode}"
         )
         db.add(mode_log)
-        
         db.commit()
         
+        message = f"Switched to {mode} mode - Instant mode switching complete"
         return {
             "status": "success",
             "mode": mode,
-            "message": message
+            "message": message,
+            "demo_projects": 133 if mode == "DEMO" else 0,
+            "production_projects": 6 if mode == "PRODUCTION" else 0
         }
     except Exception as e:
         db.rollback()
