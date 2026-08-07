@@ -5,6 +5,7 @@ from app.database import get_db
 from app.models.ci_audit import CIAudit
 from app.models.user import User
 from app.core.rbac import get_current_user
+from app.core.config import get_mode
 
 router = APIRouter(prefix="/api/audit", tags=["Log Tracking"])
 
@@ -18,6 +19,7 @@ def get_audit_logs(
     - Administrator: Full access
     - Auditor: Read-only access
     
+    Filtered by current app mode (DEMO/PRODUCTION)
     Restricted for:
     - All other roles: No access
     """
@@ -27,4 +29,5 @@ def get_audit_logs(
             detail=f"{current_user.role} role does not have access to audit logs"
         )
     
-    return db.query(CIAudit).order_by(CIAudit.timestamp.desc()).all()
+    current_mode = get_mode()
+    return db.query(CIAudit).filter(CIAudit.mode == current_mode).order_by(CIAudit.timestamp.desc()).all()

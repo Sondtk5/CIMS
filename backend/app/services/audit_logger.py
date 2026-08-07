@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.ci_audit import CIAudit
+from app.core.config import get_mode
 
 def log_audit_event(
     db: Session,
@@ -22,7 +23,8 @@ def log_audit_event(
         field_changed=field_changed,
         old_value=str(old_value) if old_value is not None else None,
         new_value=str(new_value) if new_value is not None else None,
-        reason=reason
+        reason=reason,
+        mode=get_mode()  # Capture current mode
     )
     db.add(audit)
     db.commit()

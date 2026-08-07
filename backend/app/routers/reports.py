@@ -2,14 +2,16 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.ci_project import CIProject
+from app.core.config import get_mode
 from app.services.kpi_calculator import calculate_kpis
 
 router = APIRouter(prefix="/api/reports", tags=["Reports"])
 
 @router.get("/summary")
 def get_reports_summary(db: Session = Depends(get_db)):
-    kpi_data = calculate_kpis(db)
-    projects = db.query(CIProject).all()
+    current_mode = get_mode()
+    kpi_data = calculate_kpis(db, mode=current_mode)
+    projects = db.query(CIProject).filter(CIProject.mode == current_mode).all()
     
     # Department breakdown
     dept_map = {}

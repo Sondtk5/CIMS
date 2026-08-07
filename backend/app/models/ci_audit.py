@@ -15,4 +15,5 @@ class CIAudit(Base):
     old_value = Column(Text, nullable=True)
     new_value = Column(Text, nullable=True)
     reason = Column(Text, nullable=True)
+    mode = Column(String, default="PRODUCTION", nullable=False)  # DEMO or PRODUCTION
     timestamp = Column(DateTime, default=datetime.utcnow)
