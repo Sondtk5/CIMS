@@ -261,18 +261,17 @@ export default function AdminSettings() {
     const newMode = appMode === 'DEMO' ? 'PRODUCTION' : 'DEMO';
     setTogglingMode(true);
     try {
-      await settingsAPI.setMode(newMode);
+      const res = await settingsAPI.setMode(newMode);
       setAppMode(newMode);
       setMsg({ 
         open: true, 
-        text: `Switched to ${newMode} mode instantly - No restart needed!`, 
+        text: `✅ Switched to ${newMode} mode instantly!`, 
         type: 'success' 
       });
-      // Auto-reload data after 1 second
+      // Reload data WITHOUT reloading page
       setTimeout(() => {
         loadData();
-        window.location.reload(); // Soft reload to refresh all data
-      }, 1500);
+      }, 500);
     } catch (err) {
       setMsg({ open: true, text: err.response?.data?.detail || 'Failed to toggle mode', type: 'error' });
     } finally {
