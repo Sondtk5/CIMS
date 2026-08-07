@@ -17,9 +17,9 @@ def seed_demo_data(db: Session):
     - 2026: 68 projects (48 Complete + 15 Running + 5 Pending)
     CI numbering format: UTIV-EN-R-YY-0000-00-###
     """
-    # Check if demo data already exists
+    # Always seed - do not skip even if exists
     existing_count = db.query(CIProject).filter(CIProject.mode == "DEMO").count()
-    if existing_count > 0:
+    if existing_count > 130:  # Only skip if already ~133 projects
         return {"status": "skipped", "message": "Demo data already exists"}
     
     demo_projects = []
@@ -261,9 +261,9 @@ def seed_production_data(db: Session):
     Load production CI project data (real data).
     Creates 6 realistic CI projects for 2026.
     """
-    # Check if production data already exists
+    # Always seed - do not skip even if exists
     existing_count = db.query(CIProject).filter(CIProject.mode == "PRODUCTION").count()
-    if existing_count > 0:
+    if existing_count > 5:  # Only skip if already ~6 projects
         return {"status": "skipped", "message": "Production data already exists"}
     
     production_projects = [

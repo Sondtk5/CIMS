@@ -107,8 +107,10 @@ def seed_db():
             db.commit()
 
         # 5. Seed CI Projects - Demo data (133 projects) and Production data (6 projects)
-        seed_demo_data(db)
-        seed_production_data(db)
+        result_demo = seed_demo_data(db)
+        print(f"Demo seed result: {result_demo}")
+        result_prod = seed_production_data(db)
+        print(f"Production seed result: {result_prod}")
 
         # 6. Seed Monthly KPI Snapshots for 2026 if empty
         if db.query(MonthlyKPISnapshot).count() == 0:
