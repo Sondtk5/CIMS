@@ -114,7 +114,7 @@ export default function CIRequestFormPrintView({ project }) {
             <TableCell sx={{ fontWeight: 'bold', width: '20%', backgroundColor: '#f8fafc' }}>Reviewed By</TableCell>
             <TableCell sx={{ width: '30%' }}>{project.tpm_reviewed_by || ''}</TableCell>
             <TableCell sx={{ fontWeight: 'bold', width: '20%', backgroundColor: '#f8fafc' }}>Review Date</TableCell>
-            <TableCell sx={{ width: '30%' }}>{project.tpm_review_date || project.start_date}</TableCell>
+            <TableCell sx={{ width: '30%' }}>{project.tpm_review_date || ''}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f8fafc' }}>Priority</TableCell>
