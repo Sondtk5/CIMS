@@ -20,8 +20,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-cims.db
-backend/cims.db
+# Database is now tracked for backup
+# cims.db
+# backend/cims.db
 
 # Node
 node_modules/
