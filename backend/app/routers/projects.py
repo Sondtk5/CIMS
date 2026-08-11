@@ -70,10 +70,12 @@ def create_project(
 ):
     """
     Create project - only Administrator, TPM Manager, Engineer
+    Auto-generates CI No based on current mode (DEMO or PRODUCTION)
     """
-    # Auto-generate CI No using new config-based system
+    # Auto-generate CI No using new mode-specific config system
     if not project_in.ci_no:
-        project_in.ci_no = generate_ci_number(db)
+        current_mode = get_mode()
+        project_in.ci_no = generate_ci_number(db, mode=current_mode.lower())
 
     # Calculate achievement rate if metrics present
     ach_rate = project_in.achievement_rate

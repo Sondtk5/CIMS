@@ -122,7 +122,7 @@ export default function ProjectRegister() {
           </Grid>
           <Grid item xs={2.5}>
             <TextField select size="small" fullWidth label="Department" value={department} onChange={(e) => setDepartment(e.target.value)}>
-              {['All', 'Quality', 'Production', 'TPM', 'Slit Coater', 'Wet Bench', 'IOX', 'Overall'].map((d) => (
+              {['All', 'Quality', 'Production', 'TPM', 'PE', 'AM', 'Infra', 'EHS', 'Finance', 'HR', 'Sales', 'Logistics'].map((d) => (
                 <MenuItem key={d} value={d}>{d}</MenuItem>
               ))}
             </TextField>

@@ -68,9 +68,6 @@ export default function MasterDashboard() {
 
   useEffect(() => {
     loadDashboard();
-    // Reload dashboard every 3 seconds to catch mode changes
-    const interval = setInterval(loadDashboard, 3000);
-    return () => clearInterval(interval);
   }, [selectedYear]);
 
   // Force chart re-render when theme changes (ECharts doesn't auto-detect)

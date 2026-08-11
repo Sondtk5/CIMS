@@ -35,22 +35,23 @@ class CINumberingConfigResponse(BaseModel):
     example: str
 
 # ===== Admin: Get CI Numbering Configuration =====
-@router.get("/ci-numbering", response_model=CINumberingConfigResponse)
+@router.get("/ci-numbering")
 def get_ci_numbering_config(
+    mode: str = "production",
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(["Administrator", "TPM Manager", "Engineer", "QA Inspector"]))
 ):
-    """Get current CI numbering configuration (all users can read)"""
-    return get_ci_numbering_format(db)
+    """Get current CI numbering configuration for the specified mode (DEMO or PRODUCTION)"""
+    return get_ci_numbering_format(db, mode.lower())
 
 # ===== Admin: Update CI Numbering Configuration =====
-@router.put("/ci-numbering", response_model=dict)
+@router.put("/ci-numbering")
 def update_ci_numbering(
     config: CINumberingConfigUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(["Administrator"]))
 ):
-    """Update CI numbering configuration (Admin only)"""
+    """Update CI numbering configuration (affects both DEMO and PRODUCTION - shared structure only)"""
     try:
         # Validate parts
         if not config.parts:
@@ -71,8 +72,8 @@ def update_ci_numbering(
         
         return {
             "status": "success",
-            "message": "CI numbering configuration updated",
-            "config": get_ci_numbering_format(db)
+            "message": "CI numbering configuration updated (applies to both DEMO and PRODUCTION modes)",
+            "config": get_ci_numbering_format(db, "production")
         }
     except Exception as e:
         raise HTTPException(
@@ -85,25 +86,23 @@ def update_ci_numbering(
 def preview_next_ci_number(
     dept_code: str = None,
     cat_code: str = None,
+    mode: str = "production",
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles(["Administrator", "TPM Manager", "Engineer"]))
 ):
-    """Preview next CI number that will be generated (without incrementing)"""
+    """Preview next CI number for the specified mode (without incrementing)"""
     try:
-        # Get current config
-        setting = get_or_create_ci_numbering_config(db)
+        # Get current config for the mode
+        setting = get_or_create_ci_numbering_config(db, mode.lower())
         config = setting.setting_value
         
-        # Temporarily increment counter to generate preview
-        original_counter = config.get("next_counter", 1)
-        config["next_counter"] = original_counter
+        # Generate preview without incrementing
+        next_ci = generate_ci_number(db, dept_code, cat_code, mode.lower(), commit=False)
         
-        next_ci = generate_ci_number(db, dept_code, cat_code)
-        
-        # Don't save changes - just preview
         return {
             "next_ci_number": next_ci,
-            "current_counter": original_counter,
+            "current_counter": config.get("next_counter", 1),
+            "mode": mode.upper(),
             "note": "This is a preview. The counter will increment when project is created."
         }
     except Exception as e:

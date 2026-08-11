@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Tabs, Tab, Box, Typography,
   TextField, MenuItem, Grid, Card, CardContent, Table, TableHead, TableRow, TableCell,
-  TableBody, Chip, IconButton, Alert, Divider, Skeleton
+  TableBody, Chip, IconButton, Alert, Divider, Skeleton, Autocomplete
 } from '@mui/material';
 import {
   Close as CloseIcon, Print as PrintIcon, Save as SaveIcon, Delete as DeleteIcon, Add as AddIcon, Refresh as RefreshIcon
@@ -126,14 +126,6 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for this field when user starts typing
-    if (validationErrors[field]) {
-      setValidationErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
   };
 
   const handleSave = async () => {
@@ -231,15 +223,16 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
             <Grid container spacing={2}>
               <Grid item xs={6}>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-                  <FieldWithError
-                    field="ci_no"
-                    label={<RequiredLabel label="CI No." />}
+                  <TextField
                     fullWidth
                     size="small"
+                    label="CI No. *"
                     value={formData.ci_no || ''}
                     onChange={(e) => handleChange('ci_no', e.target.value)}
                     disabled={formData.id ? true : false}
                     placeholder={formData.id ? "CI No. (locked after creation)" : "Auto-filled or enter manually"}
+                    error={!!validationErrors['ci_no']}
+                    helperText={validationErrors['ci_no'] || ''}
                     sx={{ flex: 1 }}
                   />
                   <Button
@@ -256,23 +249,35 @@ export default function CIEditModal({ open, onClose, project, onSaved, onDelete 
                 </Box>
               </Grid>
               <Grid item xs={6}>
-                <FieldWithError
-                  field="title"
-                  label={<RequiredLabel label="Project Title" />}
+                <TextField
                   fullWidth
                   size="small"
+                  label="Project Title *"
                   value={formData.title || ''}
                   onChange={(e) => handleChange('title', e.target.value)}
+                  error={!!validationErrors['title']}
+                  helperText={validationErrors['title'] || ''}
                 />
               </Grid>
               <Grid item xs={6}>
-                <FieldWithError
-                  field="department"
-                  label={<RequiredLabel label="Department" />}
-                  fullWidth
-                  size="small"
+                <Autocomplete
+                  freeSolo
+                  options={['Quality', 'Production', 'TPM', 'PE', 'AM', 'Infra', 'EHS', 'Finance', 'HR', 'Sales', 'Logistics']}
                   value={formData.department || ''}
-                  onChange={(e) => handleChange('department', e.target.value)}
+                  onChange={(e, value) => handleChange('department', value || '')}
+                  inputValue={formData.department || ''}
+                  onInputChange={(e, value) => handleChange('department', value)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label={<Box sx={{ display: 'flex', gap: 0.5 }}><span>Department</span><span style={{ color: '#d32f2f', fontWeight: 'bold' }}>*</span></Box>}
+                      fullWidth
+                      size="small"
+                      error={!!validationErrors['department']}
+                      helperText={validationErrors['department'] || ''}
+                      placeholder="Type to search or select..."
+                    />
+                  )}
                 />
               </Grid>
               <Grid item xs={6}>
