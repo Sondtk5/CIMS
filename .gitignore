@@ -20,9 +20,13 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-# Database is now tracked for backup
-# cims.db
-# backend/cims.db
+# Database files - IGNORED (tracked via seed_production_data.json)
+backend/cims.db
+cims.db
+*.db
+
+# But TRACK the seed file for restoration
+!backend/seed_production_data.json
 
 # Node
 node_modules/

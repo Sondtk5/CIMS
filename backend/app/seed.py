@@ -7,15 +7,22 @@ from app.models.ci_project import CIProject
 from app.models.monthly_kpi_snapshot import MonthlyKPISnapshot
 from app.models.admin_setting import AdminSetting
 from app.core.security import get_password_hash
-from app.services.seed_data import seed_demo_data, seed_production_data
+from app.services.seed_data import seed_demo_data
+from app.services.seed_production_data_only import seed_production_data
 from app.migrations_mode import add_mode_column
 from datetime import datetime
 
 def seed_db():
-    # Drop ALL tables and recreate with new schema (includes mode column)
-    Base.metadata.drop_all(bind=engine)
+    # Create tables if they don't exist (don't drop existing data)
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
+    
+    # Check if database already has data - if yes, skip seeding
+    existing_projects = db.query(CIProject).count()
+    if existing_projects > 0:
+        print(f"Database already seeded with {existing_projects} projects. Skipping seed.")
+        db.close()
+        return
 
     try:
         # 1. Seed Roles if empty

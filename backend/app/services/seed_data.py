@@ -303,7 +303,7 @@ def seed_production_data(db: Session):
         },
         {
             "ci_no": "UTIV-EN-R-26-0001-02-002",
-            "title": "Takt Time Improvement",
+            "title": "Slit Coater - Takt Time Improvement",
             "category": "Productivity",
             "department": "Production",
             "process_area": "Slit Coater",
@@ -364,7 +364,7 @@ def seed_production_data(db: Session):
         },
         {
             "ci_no": "UTIV-EN-R-26-0001-02-004",
-            "title": "Reduce CPM Defect in IOX",
+            "title": "IOX SYL Improvement - CPM Defect",
             "category": "Quality",
             "department": "Quality",
             "process_area": "IOX",
@@ -394,7 +394,7 @@ def seed_production_data(db: Session):
         },
         {
             "ci_no": "UTIV-EN-R-26-0001-02-005",
-            "title": "Chemical Usage Reduction",
+            "title": "IOX SYL Improvement - OP Defect",
             "category": "Cost Saving",
             "department": "TPM",
             "process_area": "Overall",
