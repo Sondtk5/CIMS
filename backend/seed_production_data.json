@@ -1,10 +1,11 @@
 {
+  "exported_at": "2026-08-12T18:29:25.093064",
   "production_projects": [
     {
       "id": 134,
       "ci_no": "UTIV-EN-R-26-0001-02-001",
       "title": "Stain 2 Defect Improvement",
-      "department": "PD1",
+      "department": "Quality",
       "process_area": "Slit Coater",
       "category": "Quality",
       "priority": "High",
@@ -52,13 +53,13 @@
       "approval_signatures": "{\"text\": \"Park Ji-sung (Owner), Lee Min-ho (Requester), Kim Tae-hyung (TPM), Lee Jae-won (Director)\"}",
       "mode": "PRODUCTION",
       "created_at": "2026-08-12T10:50:57.448719",
-      "updated_at": "2026-08-12 10:56:51.173003"
+      "updated_at": "2026-08-12 10:53:20.764733"
     },
     {
       "id": 135,
       "ci_no": "UTIV-EN-R-26-0001-02-002",
       "title": "Slit Coater - Takt Time Improvement",
-      "department": "PD1",
+      "department": "Production",
       "process_area": "Slit Coater",
       "category": "Productivity",
       "priority": "High",
@@ -76,13 +77,13 @@
       "before_value": 274.0,
       "target_value": 443.0,
       "after_value": 420.0,
-      "achievement_rate": 86.4,
+      "achievement_rate": 90.0,
       "result": "PASS",
       "verified": "Yes",
       "verified_by": "Production Supervisor Park",
       "verified_date": "2026-08-11",
       "closing_days": 33,
-      "cost_saving": 0.0,
+      "cost_saving": 18500.0,
       "horizontal_deploy": "Yes",
       "issue_description": "Substrate loading cycle time bottlenecking overall line throughput. Current UPH: 274 (target: 443).",
       "current_status": "Current UPH is 274 pcs/hr. Bottleneck identified at loading station. Lead time: 13 seconds.",
@@ -106,13 +107,13 @@
       "approval_signatures": "{\"text\": \"Kim Tae-hyung (Owner), Choi Woo-shik (Requester), Lee Sang-min (TPM), Kim Jin-park (VP Ops)\"}",
       "mode": "PRODUCTION",
       "created_at": "2026-08-12T10:50:57.448719",
-      "updated_at": "2026-08-12 10:56:59.832451"
+      "updated_at": "2026-08-12T10:50:57.448719"
     },
     {
       "id": 136,
       "ci_no": "UTIV-EN-R-26-0001-02-003",
       "title": "Waviness Defect Improvement",
-      "department": "TPM-PD1",
+      "department": "Quality",
       "process_area": "Wet Bench",
       "category": "Quality",
       "priority": "Medium",
@@ -130,13 +131,13 @@
       "before_value": 3.1,
       "target_value": 0.0,
       "after_value": 0.15,
-      "achievement_rate": 95.2,
+      "achievement_rate": 100.0,
       "result": "PASS",
       "verified": "Yes",
       "verified_by": "Lab Manager Oh",
       "verified_date": "2026-08-16",
       "closing_days": 36,
-      "cost_saving": 0.0,
+      "cost_saving": 8800.0,
       "horizontal_deploy": "No",
       "issue_description": "Surface waviness defect observed during wet etching stage. Affects product appearance and customer returns.",
       "current_status": "Defect rate at 3.10%. Customer complaints: 15 cases. Return rate: 2.8%.",
@@ -160,7 +161,7 @@
       "approval_signatures": "{\"text\": \"Choi Jin-soo (Owner), Kang Daniel (Requester), Park Sun-ho (TPM), Jo Hyun-mo (Plant Mgr)\"}",
       "mode": "PRODUCTION",
       "created_at": "2026-08-12T10:50:57.448719",
-      "updated_at": "2026-08-12 11:01:01.794282"
+      "updated_at": "2026-08-12T10:50:57.448719"
     },
     {
       "id": 137,
@@ -184,13 +185,13 @@
       "before_value": 12.0,
       "target_value": 1.5,
       "after_value": 1.85,
-      "achievement_rate": 96.7,
+      "achievement_rate": 92.0,
       "result": "FAIL",
       "verified": "Yes",
       "verified_by": "Technical Lead Seo",
       "verified_date": "2026-07-28",
       "closing_days": 13,
-      "cost_saving": 0.0,
+      "cost_saving": 13000.0,
       "horizontal_deploy": "Yes",
       "issue_description": "CPM particle defect after chemical ion exchange process. Root cause: process parameter drift.",
       "current_status": "Defect rate dropped from 12% to 1.85%. Target 1.5% missed by 0.35%. Under investigation.",
@@ -214,7 +215,7 @@
       "approval_signatures": "{\"text\": \"Song Hye-kyo (Owner), Han So-hee (Requester), Choi Min-jae (TPM)\"}",
       "mode": "PRODUCTION",
       "created_at": "2026-08-12T10:50:57.448719",
-      "updated_at": "2026-08-12 10:57:15.970449"
+      "updated_at": "2026-08-12T10:50:57.448719"
     },
     {
       "id": 138,
