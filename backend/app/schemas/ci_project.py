@@ -12,6 +12,7 @@ class CIProjectBase(BaseModel):
     requester: Optional[str] = None
     position: Optional[str] = None
     contact: Optional[str] = None
+    mode: Optional[str] = "DEMO"  # PRODUCTION or DEMO
     
     start_date: str
     due_date: str
@@ -115,6 +116,7 @@ class CIProjectUpdate(BaseModel):
 class CIProjectResponse(CIProjectBase):
     id: int
     ci_no: str
+    mode: str  # Include mode in response
     created_at: datetime
     updated_at: datetime
 
